@@ -4345,7 +4345,7 @@ function subscribeToRealtime(){
 function getAllTxns(){
   const result = {};
   for(let k in localStorage){
-    if(k.startsWith('txns_')) result[k] = localStorage[k];
+    if(k.startsWith('txn_')) result[k] = localStorage[k];
   }
   return result;
 }
@@ -4353,7 +4353,7 @@ function getAllTxns(){
 // Helper: restore txns from cloud
 function restoreAllTxns(txns){
   for(let k in txns){
-    if(k.startsWith('txns_')) localStorage.setItem(k, txns[k]);
+    if(k.startsWith('txn_')) localStorage.setItem(k, txns[k]);
   }
 }
 
