@@ -67,15 +67,42 @@ body.dark .auth-btn-secondary { background: #334155; color: #f1f5f9; }
 .auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:#e2e8f0; }
 body.dark .auth-divider::before, body.dark .auth-divider::after { background:#334155; }
 
-/* ===== CLOUD USER BAR ===== */
-.cloud-bar {
-  background: rgba(255,255,255,0.1); border-radius: 12px;
-  padding: 7px 12px; display: flex; align-items: center; gap: 8px;
-  margin-top: 8px; font-size: 12px;
+/* ===== USER MENU (AVATAR + DROPDOWN) ===== */
+.user-menu { position:relative; flex-shrink:0; }
+.user-avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:linear-gradient(135deg,#e94560,#be123c);
+  border:2px solid rgba(255,255,255,0.2);
+  color:#fff; font-size:13px; font-weight:900;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-family:'Cairo',sans-serif; transition:transform 0.2s, box-shadow 0.2s;
 }
-.cloud-bar .cb-email { flex: 1; color: rgba(255,255,255,0.8); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cloud-bar .cb-sync { background: #10b981; border: none; border-radius: 8px; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; cursor: pointer; font-family: 'Cairo', sans-serif; flex-shrink: 0; }
-.cloud-bar .cb-logout { background: rgba(255,255,255,0.15); border: none; border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 700; padding: 4px 10px; cursor: pointer; font-family: 'Cairo', sans-serif; flex-shrink: 0; }
+.user-avatar:active { transform:scale(0.9); }
+.user-avatar:hover { box-shadow:0 0 0 3px rgba(233,69,96,0.35); }
+.user-dropdown {
+  display:none; position:absolute;
+  top:calc(100% + 10px); left:0;
+  background:#1a2744; border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px; padding:12px; min-width:190px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:500;
+}
+body.dark .user-dropdown { background:#0f1c33; }
+.user-dropdown.open { display:block; }
+.ud-email {
+  font-size:11px; color:rgba(255,255,255,0.5); font-weight:700;
+  padding:2px 2px 10px; border-bottom:1px solid rgba(255,255,255,0.08);
+  margin-bottom:8px; word-break:break-all; direction:ltr; text-align:left;
+}
+.ud-btn {
+  display:block; width:100%; padding:9px 12px;
+  border:none; border-radius:9px; font-size:12px; font-weight:700;
+  font-family:'Cairo',sans-serif; cursor:pointer;
+  text-align:right; margin-bottom:6px; transition:opacity 0.15s;
+}
+.ud-btn:last-child { margin-bottom:0; }
+.ud-btn:active { opacity:0.7; }
+.ud-sync { background:rgba(16,185,129,0.15); color:#34d399; }
+.ud-logout { background:rgba(239,68,68,0.12); color:#f87171; }
 .cloud-sync-badge {
   position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
   background: #3b82f6; color: #fff; font-size: 11px; font-weight: 700;
@@ -223,9 +250,8 @@ input, textarea, select { font-size: 16px !important; } /* prevents iOS zoom on 
   }
 
   /* Header */
-  .header { padding: 20px 28px 16px; }
-  .header-stats { max-width: 500px; margin: 12px auto 0; gap: 16px; }
-  .hs-item { padding: 10px 12px; }
+  .header { padding: 12px 24px; position:sticky; top:0; z-index:100; }
+  .header h1 { font-size:17px; }
 
   /* Tabs */
   .tabs { max-width: 100%; }
@@ -248,8 +274,7 @@ input, textarea, select { font-size: 16px !important; } /* prevents iOS zoom on 
   .section { padding: 16px 28px; }
   .cat-list { grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
   .eg-planning { width: 360px; top: 90px; }
-  .header h1 { font-size: 24px; }
-  .hs-item .hs-val { font-size: 17px; }
+  .header h1 { font-size: 19px; }
   .sum-grid { grid-template-columns: repeat(6, 1fr); }
   #compare-content { grid-template-columns: repeat(3, 1fr); }
   .modal-content { max-width: 620px !important; }
@@ -263,33 +288,25 @@ input, textarea, select { font-size: 16px !important; } /* prevents iOS zoom on 
 
 /* ===== HEADER ===== */
 .header{
-  background:linear-gradient(135deg,var(--dark) 0%,var(--dark2) 100%);
-  color:#fff;padding:20px 18px 16px;
-  text-align:center;position:sticky;top:0;z-index:100;
-  box-shadow:0 4px 20px rgba(0,0,0,0.2);
+  background:#0f172a; color:#fff;
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.3);
 }
-body.dark .header { background: linear-gradient(135deg,#0f172a 0%,#1e293b 100%); }
-.header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-.header h1{font-size:20px;font-weight:900;letter-spacing:-0.3px; flex:1; text-align:center;}
-.header p{font-size:12px;opacity:0.65;margin-top:4px}
-.header-stats{
-  display:flex;gap:10px;margin-top:12px;
-}
-.hs-item{
-  flex:1;background:rgba(255,255,255,0.1);border-radius:12px;
-  padding:8px 6px;text-align:center;
-}
-.hs-item .hs-val{font-size:14px;font-weight:800;color:#fff}
-.hs-item .hs-lbl{font-size:10px;opacity:0.7;margin-top:2px}
+body.dark .header { background:#060c18; }
+.header h1{ font-size:15px; font-weight:900; flex:1; }
+.header p{ display:none }
+.header-stats{ display:none }
 
 /* Dark mode toggle */
-.dark-toggle {
-  background: rgba(255,255,255,0.15); border: none; border-radius: 50%;
-  width: 36px; height: 36px; cursor: pointer; font-size: 18px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; flex-shrink: 0;
+.dark-toggle{
+  background:rgba(255,255,255,0.1); border:none;
+  border-radius:8px; width:32px; height:32px;
+  cursor:pointer; font-size:14px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
 }
-.dark-toggle:active { transform: scale(0.9); }
+.dark-toggle:active{ transform:scale(0.9); }
 
 /* ===== STORAGE WARNING ===== */
 .storage-warning {
@@ -317,7 +334,6 @@ body.dark .header { background: linear-gradient(135deg,#0f172a 0%,#1e293b 100%);
 .tabs{
   display:flex;background:#fff;
   border-bottom:1px solid var(--border);
-  position:sticky;z-index:99;
   box-shadow:0 2px 8px rgba(0,0,0,0.06);
 }
 .tab{
@@ -1195,31 +1211,16 @@ body.dark .sbb-suggest { color:#34d399; }
   <div class="autosave-badge" id="autosave-badge">💾 تم الحفظ تلقائياً</div>
 
   <div class="header">
-    <div class="header-top">
-      <div style="width:36px"></div>
-      <h1>🏠 مصاريف البيت الذكي</h1>
-      <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="الوضع الليلي">🌙</button>
-    </div>
-    <p>تتبع ذكي • حدود • مقارنة • توفير</p>
-    <!-- Cloud user bar (shown when logged in) -->
-    <div class="cloud-bar" id="cloud-bar" style="display:none">
-      <span>☁️</span>
-      <span class="cb-email" id="cb-email-text"></span>
-      <button class="cb-sync" onclick="cloudSync()">🔄 مزامنة</button>
-      <button class="cb-logout" onclick="cloudLogout()">خروج</button>
-    </div>
-    <div class="header-stats">
-      <div class="hs-item">
-        <div class="hs-val" id="hdr-total">0</div>
-        <div class="hs-lbl">المصاريف</div>
-      </div>
-      <div class="hs-item">
-        <div class="hs-val" id="hdr-remaining">0</div>
-        <div class="hs-lbl">المتبقي</div>
-      </div>
-      <div class="hs-item">
-        <div class="hs-val" id="hdr-saving-pct">0%</div>
-        <div class="hs-lbl">نسبة التوفير</div>
+    <h1>🏠 مصاريف البيت الذكي</h1>
+    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="الوضع الليلي">🌙</button>
+    <div class="user-menu" id="cloud-bar" style="display:none">
+      <button class="user-avatar" onclick="toggleUserMenu(event)">
+        <span id="user-avatar-letter">؟</span>
+      </button>
+      <div class="user-dropdown" id="user-dropdown">
+        <div class="ud-email" id="cb-email-text"></div>
+        <button class="ud-btn ud-sync" onclick="cloudSync();closeUserMenu()">🔄 مزامنة</button>
+        <button class="ud-btn ud-logout" onclick="cloudLogout()">خروج 🚪</button>
       </div>
     </div>
   </div>
@@ -1799,6 +1800,18 @@ function loadDarkMode(){
     if(btn) btn.textContent = '☀️';
   }
 }
+function toggleUserMenu(e){
+  e.stopPropagation();
+  document.getElementById('user-dropdown').classList.toggle('open');
+}
+function closeUserMenu(){
+  const d = document.getElementById('user-dropdown');
+  if(d) d.classList.remove('open');
+}
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.user-menu')) closeUserMenu();
+});
+
 function toggleDark(){
   document.body.classList.toggle('dark');
   const isDark = document.body.classList.contains('dark');
@@ -1917,9 +1930,6 @@ function updateHeaderStats(){
   const em = s.emergency||0;
   const remaining = income - total - em;
   const savPct = income>0 ? Math.max(0,Math.round((remaining/income)*100)) : 0;
-  document.getElementById('hdr-total').textContent = fmt(total);
-  document.getElementById('hdr-remaining').textContent = fmt(remaining);
-  document.getElementById('hdr-saving-pct').textContent = savPct+'%';
 }
 
 // ==================== RENDER ENTRY ====================
@@ -4186,8 +4196,9 @@ function wipeLocalAppData(){
 
 async function onLogin(){
   document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('cloud-bar').style.display = 'flex';
+  document.getElementById('cloud-bar').style.display = 'block';
   document.getElementById('cb-email-text').textContent = currentUser.email;
+  document.getElementById('user-avatar-letter').textContent = currentUser.email[0].toUpperCase();
   document.getElementById('cloud-settings-box').style.display = 'block';
 
   // Detect account switch: if local data belongs to a different user, wipe it
