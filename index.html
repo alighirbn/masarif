@@ -3515,6 +3515,11 @@ async function authAction(){
       if(pass.length < 6){ showAuthError('كلمة المرور يجب أن تكون 6 أحرف على الأقل'); btn.disabled=false; btn.textContent='✅ إنشاء حساب'; return; }
       const { data, error } = await db.auth.signUp({ email, password: pass });
       if(error) throw error;
+      if(data.session){
+        currentUser = data.user;
+        await onLogin();
+        return;
+      }
       showAuthError('✅ تم إنشاء الحساب! تحقق من بريدك الإلكتروني لتفعيل الحساب، ثم سجّل الدخول.');
       document.getElementById('auth-error').style.background = '#dcfce7';
       document.getElementById('auth-error').style.color = '#166534';
@@ -3528,12 +3533,24 @@ async function authAction(){
       await onLogin();
     }
   } catch(err) {
-    const msgs = {
-      'Invalid login credentials': 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
-      'Email not confirmed': 'يرجى تأكيد بريدك الإلكتروني أولاً',
-      'User already registered': 'هذا البريد الإلكتروني مسجّل مسبقاً',
-    };
-    showAuthError(msgs[err.message] || err.message);
+    const msg = (err.message || '').toLowerCase();
+    let arabicMsg;
+    if(msg.includes('email rate limit') || msg.includes('over_email_send_rate')){
+      arabicMsg = '⏳ تجاوزت عدد المحاولات المسموح. انتظر ساعة، أو استخدم "📱 بدون حساب" للبدء فوراً.';
+    } else if(msg.includes('invalid login credentials')){
+      arabicMsg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+    } else if(msg.includes('email not confirmed')){
+      arabicMsg = '⚠️ يرجى تأكيد بريدك من الرسالة المرسلة إليك أولاً';
+    } else if(msg.includes('user already registered')){
+      arabicMsg = 'هذا البريد مسجّل مسبقاً — جرّب تسجيل الدخول';
+    } else if(msg.includes('rate limit')){
+      arabicMsg = '⏳ كثرة محاولات. انتظر قليلاً ثم أعد المحاولة.';
+    } else if(msg.includes('network') || msg.includes('failed to fetch')){
+      arabicMsg = '❌ مشكلة اتصال بالشبكة. تحقق من الإنترنت.';
+    } else {
+      arabicMsg = err.message;
+    }
+    showAuthError(arabicMsg);
     btn.disabled=false;
     btn.textContent = authMode === 'login' ? '🔑 تسجيل الدخول' : '✅ إنشاء حساب';
   }
