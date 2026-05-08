@@ -4167,11 +4167,37 @@ async function forgotPassword(){
   }
 }
 
+// Wipe app data from localStorage (used on logout / account switch)
+function wipeLocalAppData(){
+  const keysToRemove = [];
+  for(let k in localStorage){
+    if(!localStorage.hasOwnProperty(k)) continue;
+    if(k === 'home_exp' || k === 'category_limits' || k === 'home_cats' ||
+       k === 'bills' || k === 'local_updated' ||
+       k.startsWith('txn_') || k.startsWith('note_') ||
+       k.startsWith('recurring_dismiss_')){
+      keysToRemove.push(k);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+  CATS = DEFAULT_CATS.map(c=>({...c}));
+  currentLimits = {...DEFAULT_LIMITS};
+}
+
 async function onLogin(){
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('cloud-bar').style.display = 'flex';
   document.getElementById('cb-email-text').textContent = currentUser.email;
   document.getElementById('cloud-settings-box').style.display = 'block';
+
+  // Detect account switch: if local data belongs to a different user, wipe it
+  // before merging so we don't leak the previous account's data into this one.
+  const lastUserId = localStorage.getItem('last_user_id');
+  if(lastUserId && lastUserId !== currentUser.id){
+    wipeLocalAppData();
+  }
+  localStorage.setItem('last_user_id', currentUser.id);
+
   // Smart merge: compare local vs cloud before overwriting
   await smartMergeOnLogin();
   subscribeToRealtime();
@@ -4182,7 +4208,7 @@ async function cloudLogout(){
   const ok = await customConfirm({
     icon: '👋',
     title: 'تسجيل الخروج',
-    message: 'سيتم رفع بياناتك للسحابة قبل الخروج.',
+    message: 'سيتم رفع بياناتك للسحابة، ثم تُمسح من هذا الجهاز لحماية خصوصيتك.',
     okText: 'خروج',
     cancelText: 'البقاء'
   });
@@ -4191,6 +4217,9 @@ async function cloudLogout(){
   if(realtimeChannel){ db.removeChannel(realtimeChannel); realtimeChannel = null; }
   await db.auth.signOut();
   currentUser = null;
+  // Clear local data so the next user (or "بدون حساب" mode) doesn't see it
+  wipeLocalAppData();
+  localStorage.removeItem('last_user_id');
   document.getElementById('cloud-bar').style.display = 'none';
   document.getElementById('cloud-settings-box').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
