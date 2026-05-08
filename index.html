@@ -2039,7 +2039,10 @@ function updateStorageInfo(){
     // Show warning if > 3MB
     const warn = document.getElementById('storage-warning');
     if(warn){
-      if(mb > 3){
+      if(currentUser){
+        // Logged in → data is on the cloud, no need to nag about backups
+        warn.style.display = 'none';
+      } else if(mb > 3){
         warn.style.display = 'flex';
         document.getElementById('storage-warning-text').textContent =
           `⚠️ حجم البيانات كبير (${kb} KB). يُنصح بتصدير نسخة احتياطية!`;
