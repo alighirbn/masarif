@@ -817,6 +817,187 @@ body.dark .nl-item.danger { background:#1a0505; border-color:#f87171; }
 .scb-badge.down { background:rgba(233,69,96,0.25); color:#f87171; }
 body.dark .saving-compare-box { background:linear-gradient(135deg,#020617,#0f172a); }
 
+/* ===== HEALTH HERO ===== */
+.health-hero {
+  background: linear-gradient(135deg, #0d1b2a, #1b2d3e);
+  border-radius: 22px; padding: 18px 18px 16px; margin-bottom: 14px;
+  color: #fff; box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+.health-hero::before {
+  content:''; position:absolute; top:-30px; left:-30px;
+  width:140px; height:140px; border-radius:50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
+}
+.hh-row { display:flex; align-items:center; gap:14px; position:relative; z-index:1; }
+.hh-score-wrap {
+  width:84px; height:84px; flex-shrink:0; position:relative;
+}
+.hh-score-wrap svg { width:84px; height:84px; transform:rotate(-90deg); }
+.hh-score-num {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:26px; font-weight:900;
+}
+.hh-info { flex:1; min-width:0; }
+.hh-status { font-size:18px; font-weight:900; margin-bottom:2px; }
+.hh-emoji { font-size:22px; margin-left:4px; }
+.hh-desc { font-size:12px; opacity:0.75; font-weight:600; line-height:1.5; }
+.hh-factors {
+  display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; position:relative; z-index:1;
+}
+.hh-factor {
+  background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+  border-radius:10px; padding:5px 10px; font-size:11px; font-weight:700;
+  display:flex; align-items:center; gap:5px;
+}
+.hh-factor.good { background:rgba(16,185,129,0.18); border-color:rgba(16,185,129,0.35); color:#6ee7b7; }
+.hh-factor.warn { background:rgba(245,158,11,0.18); border-color:rgba(245,158,11,0.35); color:#fcd34d; }
+.hh-factor.bad { background:rgba(233,69,96,0.18); border-color:rgba(233,69,96,0.35); color:#fca5a5; }
+
+/* ===== SMART KPI CARDS ===== */
+.dash-card { position:relative; }
+.dc-trend {
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:10px; font-weight:800; padding:2px 7px; border-radius:8px;
+  margin-top:5px;
+}
+.dc-trend.up { background:rgba(233,69,96,0.12); color:#dc2626; }
+.dc-trend.down { background:rgba(16,185,129,0.12); color:#059669; }
+.dc-trend.flat { background:rgba(148,163,184,0.15); color:#64748b; }
+.dc-trend.up-good { background:rgba(16,185,129,0.12); color:#059669; }
+.dc-trend.down-bad { background:rgba(233,69,96,0.12); color:#dc2626; }
+body.dark .dc-trend.up { background:rgba(233,69,96,0.18); color:#fca5a5; }
+body.dark .dc-trend.down { background:rgba(16,185,129,0.18); color:#6ee7b7; }
+body.dark .dc-trend.up-good { background:rgba(16,185,129,0.18); color:#6ee7b7; }
+body.dark .dc-trend.down-bad { background:rgba(233,69,96,0.18); color:#fca5a5; }
+body.dark .dc-trend.flat { background:rgba(148,163,184,0.15); color:#94a3b8; }
+
+/* ===== DAYS LEFT BAR ===== */
+.days-bar {
+  background: var(--card); border-radius:16px; padding:12px 14px;
+  box-shadow: var(--shadow); margin-bottom:14px;
+  display:flex; align-items:center; gap:12px;
+}
+.db-icon {
+  width:42px; height:42px; border-radius:12px; flex-shrink:0;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; color:#fff;
+}
+.db-info { flex:1; min-width:0; }
+.db-title { font-size:11px; font-weight:700; color:var(--text2); }
+.db-main { font-size:15px; font-weight:900; color:var(--dark); margin-top:2px; }
+.db-allow {
+  text-align:left; flex-shrink:0;
+  padding-left:10px; border-left:1.5px solid var(--border);
+}
+.db-allow-lbl { font-size:10px; font-weight:700; color:var(--text2); }
+.db-allow-val { font-size:14px; font-weight:900; color:var(--green); margin-top:2px; }
+.db-allow-val.red { color:#dc2626; }
+
+/* ===== DAILY SPENDING CHART ===== */
+.daily-chart-box {
+  background: var(--card); border-radius:18px; padding:16px;
+  box-shadow: var(--shadow); margin-bottom:14px;
+}
+.dcb-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:8px; }
+.dcb-title { font-size:13px; font-weight:800; color:var(--dark); }
+.dcb-tag {
+  font-size:10px; font-weight:800; padding:3px 8px; border-radius:8px;
+  background:rgba(59,130,246,0.12); color:#1d4ed8;
+}
+body.dark .dcb-tag { background:rgba(59,130,246,0.2); color:#93c5fd; }
+.dcb-tag.red { background:rgba(233,69,96,0.12); color:#dc2626; }
+body.dark .dcb-tag.red { background:rgba(233,69,96,0.2); color:#fca5a5; }
+.dcb-tag.green { background:rgba(16,185,129,0.12); color:#059669; }
+body.dark .dcb-tag.green { background:rgba(16,185,129,0.2); color:#6ee7b7; }
+.dcb-svg { width:100%; height:140px; display:block; }
+.dcb-stats {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;
+  padding-top:10px; border-top:1px solid var(--border);
+}
+.dcb-stat { text-align:center; }
+.dcb-stat-lbl { font-size:10px; font-weight:700; color:var(--text2); margin-bottom:3px; }
+.dcb-stat-val { font-size:14px; font-weight:900; color:var(--dark); }
+.dcb-stat-val.red { color:#dc2626; }
+.dcb-stat-val.green { color:#059669; }
+.dcb-empty { text-align:center; padding:20px; color:#94a3b8; font-size:12px; font-weight:700; }
+
+/* ===== GOALS CARD ===== */
+.goals-box {
+  background: var(--card); border-radius:18px; padding:16px;
+  box-shadow: var(--shadow); margin-bottom:14px;
+}
+.goals-title { font-size:13px; font-weight:800; color:var(--dark); margin-bottom:12px; }
+.goal-item { margin-bottom:14px; }
+.goal-item:last-child { margin-bottom:0; }
+.gi-head {
+  display:flex; align-items:center; gap:8px; margin-bottom:6px;
+}
+.gi-icon { font-size:20px; }
+.gi-name { flex:1; font-size:12px; font-weight:800; color:var(--dark); }
+.gi-pct { font-size:13px; font-weight:900; color:var(--dark); }
+.gi-bar-bg {
+  height:10px; background: var(--border); border-radius:8px; overflow:hidden;
+  position:relative;
+}
+.gi-bar-fill {
+  height:100%; border-radius:8px; transition:width 0.5s ease;
+}
+.gi-bar-fill.saving { background:linear-gradient(90deg, #10b981, #34d399); }
+.gi-bar-fill.emergency { background:linear-gradient(90deg, #f59e0b, #fbbf24); }
+.gi-foot {
+  display:flex; justify-content:space-between; font-size:10px; font-weight:700;
+  color:var(--text2); margin-top:4px;
+}
+.gi-empty {
+  text-align:center; padding:14px; color:#94a3b8; font-size:12px; font-weight:700;
+  background: var(--bg); border-radius:12px;
+}
+
+/* ===== 6-MONTH BARS ===== */
+.bars6-box {
+  background: var(--card); border-radius:18px; padding:16px;
+  box-shadow: var(--shadow); margin-bottom:14px;
+}
+.b6-title { font-size:13px; font-weight:800; color:var(--dark); margin-bottom:6px; }
+.b6-sub { font-size:11px; color:var(--text2); font-weight:600; margin-bottom:14px; }
+.b6-svg { width:100%; height:160px; display:block; }
+.b6-legend {
+  display:flex; gap:14px; justify-content:center; margin-top:8px;
+  font-size:11px; font-weight:700; color:var(--text2);
+}
+.b6-legend-item { display:flex; align-items:center; gap:5px; }
+.b6-legend-dot { width:10px; height:10px; border-radius:3px; }
+
+/* ===== MOVERS CARD ===== */
+.movers-box {
+  background: var(--card); border-radius:18px; padding:16px;
+  box-shadow: var(--shadow); margin-bottom:14px;
+}
+.mv-title { font-size:13px; font-weight:800; color:var(--dark); margin-bottom:10px; }
+.mv-section { margin-bottom:10px; }
+.mv-section:last-child { margin-bottom:0; }
+.mv-section-lbl {
+  font-size:11px; font-weight:800; margin-bottom:6px;
+  display:flex; align-items:center; gap:5px;
+}
+.mv-section-lbl.up { color:#dc2626; }
+.mv-section-lbl.down { color:#059669; }
+.mv-item {
+  display:flex; align-items:center; gap:10px; padding:7px 10px;
+  border-radius:10px; margin-bottom:5px; font-size:12px; font-weight:700;
+}
+.mv-item.up { background:rgba(233,69,96,0.08); }
+.mv-item.down { background:rgba(16,185,129,0.08); }
+body.dark .mv-item.up { background:rgba(233,69,96,0.15); }
+body.dark .mv-item.down { background:rgba(16,185,129,0.15); }
+.mv-icon { font-size:18px; flex-shrink:0; }
+.mv-name { flex:1; color:var(--dark); }
+.mv-pct { font-weight:900; }
+.mv-pct.up { color:#dc2626; }
+.mv-pct.down { color:#059669; }
+.mv-amt { font-size:11px; color:var(--text2); white-space:nowrap; }
+
 /* ===== QUICK ADD FLOAT BTN ===== */
 .quick-add-fab {
   position:fixed; bottom:calc(24px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
@@ -3052,31 +3233,419 @@ function renderDashboard(){
   const out = document.getElementById('dashboard-content');
   if(!out) return;
 
-  // --- Top KPI Cards ---
+  // --- Previous month data for comparisons ---
+  let prevM = curMD - 1, prevY = curYD;
+  if(prevM < 0){ prevM = 11; prevY--; }
+  const sPrev = loadM(prevY, prevM);
+  const totalPrev = CATS.reduce((a,c)=>a+(sPrev[c.id]||0),0);
+  const incomePrev = sPrev.income||0;
+  const emergencyPrev = sPrev.emergency||0;
+  const remainingPrev = incomePrev - totalPrev - emergencyPrev;
+  const savPctPrev = incomePrev > 0 ? Math.max(0, Math.round((remainingPrev/incomePrev)*100)) : 0;
+
   const savPct = income > 0 ? Math.max(0, Math.round((remaining/income)*100)) : 0;
   const spentPct = income > 0 ? Math.min(Math.round((total/income)*100), 100) : 0;
+
+  // --- Helpers ---
+  const pctChange = (cur, prev) => {
+    if(prev === 0) return cur === 0 ? 0 : null;
+    return Math.round(((cur - prev) / Math.abs(prev)) * 100);
+  };
+  const trendBadge = (cur, prev, goodWhenLower) => {
+    if(prev === 0 && cur === 0) return '';
+    const ch = pctChange(cur, prev);
+    if(ch === null) return `<div class="dc-trend flat">جديد</div>`;
+    if(ch === 0) return `<div class="dc-trend flat">— ثابت</div>`;
+    const up = ch > 0;
+    const cls = goodWhenLower
+      ? (up ? 'up' : 'down')
+      : (up ? 'up-good' : 'down-bad');
+    const arrow = up ? '▲' : '▼';
+    return `<div class="dc-trend ${cls}">${arrow} ${Math.abs(ch)}%</div>`;
+  };
+
+  // --- Daily transactions for current month (used by chart + projection + health) ---
+  const dailyTotals = {};
+  let transactionsThisMonth = 0;
+  CATS.forEach(c=>{
+    const txns = loadTxns(curYD, curMD, c.id);
+    transactionsThisMonth += txns.length;
+    txns.forEach(t=>{
+      const d = t.date || '';
+      const day = d ? parseInt(d.slice(8,10)) : 0;
+      if(day >= 1 && day <= 31){
+        dailyTotals[day] = (dailyTotals[day]||0) + (t.amount||0);
+      }
+    });
+  });
+  const daysInMonth = new Date(curYD, curMD+1, 0).getDate();
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === curYD && today.getMonth() === curMD;
+  const todayDay = isCurrentMonth ? today.getDate() : daysInMonth;
+  const daysElapsed = Math.min(todayDay, daysInMonth);
+  const daysLeft = Math.max(0, daysInMonth - daysElapsed);
+  let cumulativeSoFar = 0;
+  for(let d=1; d<=daysElapsed; d++) cumulativeSoFar += (dailyTotals[d]||0);
+  const trackedTotal = cumulativeSoFar > 0 ? cumulativeSoFar : total;
+  const avgPerDay = daysElapsed > 0 ? trackedTotal/daysElapsed : 0;
+  const projection = isCurrentMonth ? Math.round(avgPerDay * daysInMonth) : total;
+  const dailyAllowance = (income > 0 && daysLeft > 0)
+    ? Math.max(0, (income - total - emergency) / daysLeft)
+    : 0;
+
+  // --- Health Score ---
+  let healthScore = 0;
+  const factors = [];
+  if(income > 0){
+    // Saving %: up to 35 points
+    const sp = savPct;
+    if(sp >= 20){ healthScore += 35; factors.push({txt:`💎 توفير ${sp}%`, cls:'good'}); }
+    else if(sp >= 10){ healthScore += 22; factors.push({txt:`💰 توفير ${sp}%`, cls:'warn'}); }
+    else if(sp > 0){ healthScore += 10; factors.push({txt:`⚠️ توفير ${sp}%`, cls:'warn'}); }
+    else { factors.push({txt:'🔴 لا توفير', cls:'bad'}); }
+
+    // Within budget: up to 25 points
+    if(total <= income){ healthScore += 25; factors.push({txt:'✅ ضمن الدخل', cls:'good'}); }
+    else { factors.push({txt:'🚨 تجاوز الدخل', cls:'bad'}); }
+
+    // Projection: up to 20 points
+    if(isCurrentMonth && projection > 0){
+      if(projection <= income){ healthScore += 20; factors.push({txt:'📈 توقع ضمن الميزانية', cls:'good'}); }
+      else if(projection <= income * 1.1){ healthScore += 10; factors.push({txt:'📈 توقع قريب من الحد', cls:'warn'}); }
+      else { factors.push({txt:'📉 توقع تجاوز', cls:'bad'}); }
+    } else if(!isCurrentMonth){
+      healthScore += 20;
+    }
+  } else {
+    factors.push({txt:'💼 لم تحدد دخلاً', cls:'warn'});
+  }
+  // Emergency fund: up to 10 points
+  if(emergency > 0){ healthScore += 10; factors.push({txt:'🛡️ احتياطي مفعّل', cls:'good'}); }
+
+  // Limits compliance: up to 10 points
+  const overLimitCats = CATS.filter(c=>{
+    const v = s[c.id]||0; const lim = getLimitForCategory(c.id);
+    return lim > 0 && v > lim;
+  }).length;
+  if(overLimitCats === 0){ healthScore += 10; }
+  else if(overLimitCats <= 2){ healthScore += 5; factors.push({txt:`⚠️ ${overLimitCats} فئة تجاوزت الحد`, cls:'warn'}); }
+  else { factors.push({txt:`🔴 ${overLimitCats} فئات تجاوزت`, cls:'bad'}); }
+
+  if(income === 0 && total === 0) healthScore = 0;
+  healthScore = Math.min(100, healthScore);
+
+  let healthLabel, healthEmoji, healthColor, healthDesc;
+  if(healthScore >= 80){ healthLabel='ممتازة'; healthEmoji='🌟'; healthColor='#10b981'; healthDesc='وضعك المالي ممتاز — حافظ على هذا الأداء'; }
+  else if(healthScore >= 60){ healthLabel='جيدة'; healthEmoji='✅'; healthColor='#3b82f6'; healthDesc='أداء جيد — في مجال للتحسين'; }
+  else if(healthScore >= 40){ healthLabel='متوسطة'; healthEmoji='⚠️'; healthColor='#f59e0b'; healthDesc='انتبه — راجع المصاريف الكبيرة'; }
+  else if(healthScore > 0){ healthLabel='ضعيفة'; healthEmoji='🚨'; healthColor='#ef4444'; healthDesc='وضع حرج — قلل الإنفاق فوراً'; }
+  else { healthLabel='ابدأ التتبع'; healthEmoji='📝'; healthColor='#94a3b8'; healthDesc='أدخل دخلك ومصاريفك لرؤية صحتك المالية'; }
+
+  const hCirc = 2 * Math.PI * 36;
+  const hDash = (healthScore/100) * hCirc;
+  const factorsHTML = factors.slice(0,4).map(f=>`<div class="hh-factor ${f.cls}">${f.txt}</div>`).join('');
+  const healthHTML = `<div class="health-hero">
+    <div class="hh-row">
+      <div class="hh-score-wrap">
+        <svg viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="8"/>
+          <circle cx="42" cy="42" r="36" fill="none" stroke="${healthColor}" stroke-width="8"
+            stroke-dasharray="${hDash} ${hCirc}" stroke-linecap="round" style="transition:all 0.6s"/>
+        </svg>
+        <div class="hh-score-num">${healthScore}</div>
+      </div>
+      <div class="hh-info">
+        <div class="hh-status">${healthLabel} <span class="hh-emoji">${healthEmoji}</span></div>
+        <div class="hh-desc">${healthDesc}</div>
+      </div>
+    </div>
+    ${factorsHTML ? `<div class="hh-factors">${factorsHTML}</div>` : ''}
+  </div>`;
+
+  // --- Smart KPI Cards with trend vs prev month ---
   const kpiHTML = `<div class="dash-grid">
     <div class="dash-card">
       <div class="dc-lbl">💸 إجمالي المصاريف</div>
       <div class="dc-val ${total > income && income > 0 ? 'red' : ''}">${fmt(total)}</div>
       <div class="dc-sub">${lbl}</div>
+      ${trendBadge(total, totalPrev, true)}
     </div>
     <div class="dash-card">
       <div class="dc-lbl">💰 الدخل</div>
       <div class="dc-val">${income > 0 ? fmt(income) : '—'}</div>
       <div class="dc-sub">${lbl}</div>
+      ${trendBadge(income, incomePrev, false)}
     </div>
     <div class="dash-card">
       <div class="dc-lbl">📉 المتبقي</div>
       <div class="dc-val ${remaining < 0 ? 'red' : 'green'}">${income > 0 ? fmt(remaining) : '—'}</div>
       <div class="dc-sub">${remaining < 0 ? 'عجز' : 'فائض'}</div>
+      ${income > 0 ? trendBadge(remaining, remainingPrev, false) : ''}
     </div>
     <div class="dash-card">
       <div class="dc-lbl">🎯 نسبة التوفير</div>
       <div class="dc-val ${savPct >= 20 ? 'green' : savPct > 0 ? 'blue' : 'red'}">${savPct}%</div>
       <div class="dc-sub">من الدخل</div>
+      ${income > 0 && incomePrev > 0 ? trendBadge(savPct, savPctPrev, false) : ''}
     </div>
   </div>`;
+
+  // --- Days left + daily allowance bar (only when current month) ---
+  let daysHTML = '';
+  if(isCurrentMonth && income > 0){
+    const allowanceRed = dailyAllowance < (avgPerDay * 0.8);
+    daysHTML = `<div class="days-bar">
+      <div class="db-icon">📅</div>
+      <div class="db-info">
+        <div class="db-title">متبقي بالشهر</div>
+        <div class="db-main">${daysLeft} يوم من ${daysInMonth}</div>
+      </div>
+      <div class="db-allow">
+        <div class="db-allow-lbl">المتاح يومياً</div>
+        <div class="db-allow-val ${allowanceRed ? 'red' : ''}">${fmt(dailyAllowance)} ${lbl}</div>
+      </div>
+    </div>`;
+  }
+
+  // --- Daily spending line chart ---
+  let dailyChartHTML = '';
+  const hasDailyData = Object.keys(dailyTotals).length > 0;
+  if(hasDailyData){
+    const W = 320, H = 140, padL = 8, padR = 8, padT = 14, padB = 22;
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
+    let cumulative = 0;
+    const points = [];
+    for(let d=1; d<=daysElapsed; d++){
+      cumulative += (dailyTotals[d]||0);
+      points.push({d, cum:cumulative, daily:dailyTotals[d]||0});
+    }
+    const maxVal = Math.max(projection, cumulative, 1);
+    const xOf = day => padL + ((day-1)/(daysInMonth-1)) * innerW;
+    const yOf = val => padT + innerH - (val/maxVal) * innerH;
+
+    // Cumulative path
+    const linePath = points.map((p,i)=>`${i===0?'M':'L'} ${xOf(p.d).toFixed(1)} ${yOf(p.cum).toFixed(1)}`).join(' ');
+    const areaPath = points.length > 0
+      ? `${linePath} L ${xOf(points[points.length-1].d).toFixed(1)} ${(padT+innerH).toFixed(1)} L ${xOf(points[0].d).toFixed(1)} ${(padT+innerH).toFixed(1)} Z`
+      : '';
+
+    // Projection dashed line from today to month end
+    let projPath = '';
+    if(isCurrentMonth && daysLeft > 0 && points.length > 0){
+      const last = points[points.length-1];
+      projPath = `M ${xOf(last.d).toFixed(1)} ${yOf(last.cum).toFixed(1)} L ${xOf(daysInMonth).toFixed(1)} ${yOf(projection).toFixed(1)}`;
+    }
+
+    // Income reference line
+    const incomeLine = income > 0 && income <= maxVal
+      ? `<line x1="${padL}" y1="${yOf(income).toFixed(1)}" x2="${padL+innerW}" y2="${yOf(income).toFixed(1)}" stroke="#10b981" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>`
+      : '';
+
+    // X-axis labels (1, ~10, ~20, last)
+    const xLabels = [1, Math.round(daysInMonth*0.33), Math.round(daysInMonth*0.66), daysInMonth]
+      .filter((v,i,a)=>a.indexOf(v)===i);
+    const xLabelsSVG = xLabels.map(d=>`<text x="${xOf(d).toFixed(1)}" y="${(H-6).toFixed(1)}" text-anchor="middle" font-size="9" fill="#94a3b8" font-weight="700">${d}</text>`).join('');
+
+    const projOverIncome = isCurrentMonth && income > 0 && projection > income;
+    const tagClass = projOverIncome ? 'red' : (projection <= income ? 'green' : '');
+    const tagText = isCurrentMonth
+      ? `توقع: ${fmt(projection)} ${lbl}`
+      : `إجمالي: ${fmt(total)} ${lbl}`;
+
+    dailyChartHTML = `<div class="daily-chart-box">
+      <div class="dcb-header">
+        <div class="dcb-title">📈 الصرف اليومي التراكمي</div>
+        <div class="dcb-tag ${tagClass}">${tagText}</div>
+      </div>
+      <svg class="dcb-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="dchart-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.02"/>
+          </linearGradient>
+        </defs>
+        ${incomeLine}
+        ${areaPath ? `<path d="${areaPath}" fill="url(#dchart-grad)"/>` : ''}
+        ${linePath ? `<path d="${linePath}" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+        ${projPath ? `<path d="${projPath}" fill="none" stroke="${projOverIncome?'#dc2626':'#94a3b8'}" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"/>` : ''}
+        ${points.length > 0 ? `<circle cx="${xOf(points[points.length-1].d).toFixed(1)}" cy="${yOf(points[points.length-1].cum).toFixed(1)}" r="3.5" fill="#3b82f6"/>` : ''}
+        ${xLabelsSVG}
+      </svg>
+      <div class="dcb-stats">
+        <div class="dcb-stat">
+          <div class="dcb-stat-lbl">معدل الصرف اليومي</div>
+          <div class="dcb-stat-val">${fmt(avgPerDay)} ${lbl}</div>
+        </div>
+        <div class="dcb-stat">
+          <div class="dcb-stat-lbl">${isCurrentMonth ? 'توقع نهاية الشهر' : 'إجمالي الشهر'}</div>
+          <div class="dcb-stat-val ${projOverIncome ? 'red' : (income > 0 && projection <= income ? 'green' : '')}">${fmt(projection)} ${lbl}</div>
+        </div>
+      </div>
+    </div>`;
+  } else if(transactionsThisMonth === 0 && total > 0){
+    dailyChartHTML = `<div class="daily-chart-box">
+      <div class="dcb-header"><div class="dcb-title">📈 الصرف اليومي</div></div>
+      <div class="dcb-empty">📋 أضف معاملات بتواريخ من تبويب الإدخال لرؤية الرسم اليومي</div>
+    </div>`;
+  }
+
+  // --- Goals card (saving goal + emergency fund) ---
+  let goalsHTML = '';
+  if(savGoal > 0 || emergency > 0){
+    const savActual = Math.max(0, remaining);
+    const savPctG = savGoal > 0 ? Math.min(100, Math.round((savActual/savGoal)*100)) : 0;
+    // Emergency is a monthly reserved amount; show it as a portion of income
+    const emerPctOfIncome = income > 0 ? Math.min(100, Math.round((emergency/income)*100)) : 0;
+
+    let inner = '';
+    if(savGoal > 0){
+      inner += `<div class="goal-item">
+        <div class="gi-head">
+          <span class="gi-icon">🎯</span>
+          <span class="gi-name">هدف التوفير</span>
+          <span class="gi-pct" style="color:${savPctG>=100?'#10b981':'var(--dark)'}">${savPctG}%</span>
+        </div>
+        <div class="gi-bar-bg"><div class="gi-bar-fill saving" style="width:${savPctG}%"></div></div>
+        <div class="gi-foot">
+          <span>${fmt(savActual)} من ${fmt(savGoal)} ${lbl}</span>
+          <span>${savPctG>=100?'✅ تحقق':`متبقي ${fmt(Math.max(0,savGoal-savActual))} ${lbl}`}</span>
+        </div>
+      </div>`;
+    }
+    if(emergency > 0){
+      const emerFootRight = income > 0
+        ? `<span>${emerPctOfIncome}% من الدخل</span>`
+        : `<span>محجوز</span>`;
+      inner += `<div class="goal-item">
+        <div class="gi-head">
+          <span class="gi-icon">🚨</span>
+          <span class="gi-name">احتياطي الطوارئ</span>
+          <span class="gi-pct">${fmt(emergency)} ${lbl}</span>
+        </div>
+        <div class="gi-bar-bg"><div class="gi-bar-fill emergency" style="width:${income > 0 ? emerPctOfIncome : 100}%"></div></div>
+        <div class="gi-foot">
+          <span>محجوز هذا الشهر</span>
+          ${emerFootRight}
+        </div>
+      </div>`;
+    }
+    goalsHTML = `<div class="goals-box">
+      <div class="goals-title">🎯 الأهداف والاحتياطي</div>
+      ${inner}
+    </div>`;
+  }
+
+  // --- 6-month income vs expenses bar chart ---
+  let bars6HTML = '';
+  {
+    const months6 = [];
+    let yy = curYD, mm = curMD;
+    for(let i=0; i<6; i++){
+      months6.unshift({y:yy, m:mm});
+      mm--; if(mm<0){ mm=11; yy--; }
+    }
+    const monthData = months6.map(({y,m})=>{
+      const md = loadM(y, m);
+      const t = CATS.reduce((a,c)=>a+(md[c.id]||0),0);
+      return {y, m, total:t, income:md.income||0};
+    });
+    const hasAny = monthData.some(d=>d.total > 0 || d.income > 0);
+    if(hasAny){
+      const W = 320, H = 160, padL = 8, padR = 8, padT = 18, padB = 28;
+      const innerW = W - padL - padR;
+      const innerH = H - padT - padB;
+      const maxV = Math.max(1, ...monthData.map(d=>Math.max(d.total, d.income)));
+      const groupW = innerW / monthData.length;
+      const barW = Math.min(18, (groupW - 6) / 2);
+      const gap = 3;
+
+      let bars = '';
+      let labels = '';
+      monthData.forEach((d,i)=>{
+        const cx = padL + groupW * i + groupW/2;
+        const incH = (d.income/maxV) * innerH;
+        const expH = (d.total/maxV) * innerH;
+        const incY = padT + innerH - incH;
+        const expY = padT + innerH - expH;
+        const incX = cx - barW - gap/2;
+        const expX = cx + gap/2;
+        bars += `<rect x="${incX.toFixed(1)}" y="${incY.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(0,incH).toFixed(1)}" rx="3" fill="#10b981"/>`;
+        bars += `<rect x="${expX.toFixed(1)}" y="${expY.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(0,expH).toFixed(1)}" rx="3" fill="#e94560"/>`;
+        const isCur = (d.y === curYD && d.m === curMD);
+        labels += `<text x="${cx.toFixed(1)}" y="${(H-12).toFixed(1)}" text-anchor="middle" font-size="10" fill="${isCur?'#0d1b2a':'#94a3b8'}" font-weight="${isCur?'900':'700'}">${MONTHS[d.m].slice(0,3)}</text>`;
+        if(isCur){
+          labels += `<text x="${cx.toFixed(1)}" y="${(H-2).toFixed(1)}" text-anchor="middle" font-size="9" fill="#3b82f6" font-weight="700">●</text>`;
+        }
+      });
+
+      // baseline
+      const baseY = padT + innerH;
+
+      bars6HTML = `<div class="bars6-box">
+        <div class="b6-title">📊 آخر 6 أشهر</div>
+        <div class="b6-sub">مقارنة الدخل والمصاريف الشهرية</div>
+        <svg class="b6-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+          <line x1="${padL}" y1="${baseY.toFixed(1)}" x2="${(padL+innerW).toFixed(1)}" y2="${baseY.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>
+          ${bars}
+          ${labels}
+        </svg>
+        <div class="b6-legend">
+          <div class="b6-legend-item"><span class="b6-legend-dot" style="background:#10b981"></span><span>الدخل</span></div>
+          <div class="b6-legend-item"><span class="b6-legend-dot" style="background:#e94560"></span><span>المصاريف</span></div>
+        </div>
+      </div>`;
+    }
+  }
+
+  // --- Biggest movers (categories changed most vs previous month) ---
+  let moversHTML = '';
+  if(totalPrev > 0 || total > 0){
+    const movers = CATS.map(c=>{
+      const cur = s[c.id]||0;
+      const prv = sPrev[c.id]||0;
+      if(cur === 0 && prv === 0) return null;
+      const change = cur - prv;
+      const ch = pctChange(cur, prv);
+      return {cat:c, cur, prv, change, pct:ch};
+    }).filter(Boolean);
+
+    const ups = movers.filter(m=>m.change > 0)
+      .sort((a,b)=>b.change - a.change).slice(0,3);
+    const downs = movers.filter(m=>m.change < 0)
+      .sort((a,b)=>a.change - b.change).slice(0,3);
+
+    const renderMv = (m, dir) => {
+      const pctTxt = m.pct === null ? 'جديد' : `${m.pct > 0 ? '+' : ''}${m.pct}%`;
+      const amtTxt = (m.change > 0 ? '+' : '') + fmt(m.change) + ' ' + lbl;
+      return `<div class="mv-item ${dir}">
+        <span class="mv-icon">${m.cat.icon}</span>
+        <span class="mv-name">${m.cat.name}</span>
+        <span class="mv-amt">${amtTxt}</span>
+        <span class="mv-pct ${dir}">${pctTxt}</span>
+      </div>`;
+    };
+
+    let inner = '';
+    if(ups.length > 0){
+      inner += `<div class="mv-section">
+        <div class="mv-section-lbl up">▲ ارتفعت</div>
+        ${ups.map(m=>renderMv(m,'up')).join('')}
+      </div>`;
+    }
+    if(downs.length > 0){
+      inner += `<div class="mv-section">
+        <div class="mv-section-lbl down">▼ انخفضت</div>
+        ${downs.map(m=>renderMv(m,'down')).join('')}
+      </div>`;
+    }
+    if(inner){
+      moversHTML = `<div class="movers-box">
+        <div class="mv-title">🔄 أكبر التغيرات (مقابل ${MONTHS[prevM]})</div>
+        ${inner}
+      </div>`;
+    }
+  }
 
   // --- Donut Chart ---
   const catColors = ['#e94560','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1','#14b8a6','#a78bfa','#fb923c','#22d3ee','#a3e635'];
@@ -3225,7 +3794,19 @@ function renderDashboard(){
   }
 
   const billsHTML = renderUpcomingBills();
-  out.innerHTML = kpiHTML + billsHTML + donutHTML + nearHTML + recentHTML + savingCompareHTML;
+  out.innerHTML =
+    healthHTML +
+    kpiHTML +
+    daysHTML +
+    billsHTML +
+    dailyChartHTML +
+    goalsHTML +
+    donutHTML +
+    moversHTML +
+    bars6HTML +
+    nearHTML +
+    recentHTML +
+    savingCompareHTML;
 }
 
 // ==================== RECURRING SUGGESTIONS ====================
