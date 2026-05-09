@@ -3371,7 +3371,7 @@ function initPullToRefresh(){
 
   document.addEventListener('touchstart', e => {
     if(window.scrollY > 0) return;
-    if(document.querySelector('.modal.active')) return;
+    if(document.querySelector('.modal.active, .qa-modal.active')) return;
     startY  = e.touches[0].clientY;
     pulling = true;
     pulled  = false;
