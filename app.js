@@ -1552,6 +1552,7 @@ function addTransaction(){
   document.getElementById('txn-desc').value = '';
 
   renderTxnList();
+  renderEntry();
   showToast(`✅ تمت إضافة ${fmt(amount)} ${getCurrencyLabel()}`);
 }
 
@@ -1571,6 +1572,7 @@ async function deleteTransaction(idx){
   syncTxnTotal(curY, curM, txnCatId);
   doSaveMonth(true);
   renderTxnList();
+  renderEntry();
   showToast('🗑️ تم الحذف');
 }
 
@@ -2758,11 +2760,78 @@ function restoreAllTxns(txns){
 // Auto-sync every 3 minutes when logged in
 setInterval(()=>{ if(currentUser) cloudSync(true); }, 3 * 60 * 1000);
 
+// ==================== PULL TO REFRESH ====================
+function initPullToRefresh(){
+  const indicator = document.getElementById('ptr-indicator');
+  const ptrText   = document.getElementById('ptr-text');
+  if(!indicator) return;
+
+  const THRESHOLD = 75;
+  let startY = 0, pulling = false, pulled = false;
+
+  document.addEventListener('touchstart', e => {
+    if(window.scrollY === 0 && !document.querySelector('.modal.active')){
+      startY  = e.touches[0].clientY;
+      pulling = true;
+      pulled  = false;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if(!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    if(dy <= 0){ pulling = false; resetPTR(); return; }
+    const h = Math.min(dy * 0.45, THRESHOLD * 0.9);
+    indicator.style.height  = h + 'px';
+    indicator.style.opacity = Math.min(dy / THRESHOLD, 1);
+    pulled = dy >= THRESHOLD;
+    if(pulled){
+      indicator.classList.add('ptr-ready');
+      ptrText.textContent = 'حرر للتحديث ↑';
+    } else {
+      indicator.classList.remove('ptr-ready');
+      ptrText.textContent = 'اسحب للتحديث ↓';
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    if(!pulling) return;
+    pulling = false;
+    if(pulled){
+      indicator.classList.add('ptr-refreshing');
+      indicator.classList.remove('ptr-ready');
+      ptrText.textContent = 'جاري التحديث...';
+      setTimeout(() => { doRefresh(); resetPTR(); }, 650);
+    } else {
+      resetPTR();
+    }
+  });
+
+  function resetPTR(){
+    indicator.style.height  = '0';
+    indicator.style.opacity = '0';
+    indicator.classList.remove('ptr-ready', 'ptr-refreshing');
+    ptrText.textContent = 'اسحب للتحديث ↓';
+  }
+
+  function doRefresh(){
+    const sec = document.querySelector('.section.active');
+    const tab = sec ? sec.id.replace('tab-', '') : 'entry';
+    if(tab === 'entry')    renderEntry();
+    if(tab === 'dashboard') renderDashboard();
+    if(tab === 'summary')  renderSummaryContent();
+    if(tab === 'compare')  renderCompare();
+    updateHeaderStats();
+    showToast('✓ تم التحديث');
+  }
+}
+
 // ==================== INIT ====================
 function initApp(){
   loadCats();
   loadLimits();
   loadDarkMode();
+  initPullToRefresh();
   renderEntry();
   renderDashboard();
   renderSummaryContent();
