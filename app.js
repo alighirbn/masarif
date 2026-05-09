@@ -1658,10 +1658,16 @@ function renderDashboard(){
   const incCash = income - incCard;
   let cashExp = 0, cardExp = 0;
   CATS.forEach(cat => {
-    loadTxns(curYD, curMD, cat.id).forEach(t => {
-      if(t.method === 'card') cardExp += (t.amount || 0);
-      else                    cashExp += (t.amount || 0);
-    });
+    const txns = loadTxns(curYD, curMD, cat.id);
+    if(txns.length > 0){
+      txns.forEach(t => {
+        if(t.method === 'card') cardExp += (t.amount || 0);
+        else                    cashExp += (t.amount || 0);
+      });
+    } else {
+      // مبلغ قديم بدون حركات — يُعدّ كاش لضمان التوازن
+      cashExp += (s[cat.id] || 0);
+    }
   });
   const trsD    = loadTransfers(curYD, curMD);
   const c2cD    = trsD.filter(t=>t.dir==='card2cash').reduce((a,t)=>a+t.amount, 0);
@@ -2892,13 +2898,18 @@ function renderBalanceSummary(){
 
   if(income === 0){ container.innerHTML = ''; return; }
 
-  // Sum cash/card spending from all category transactions
+  // Sum cash/card spending — fallback to saved total as cash if no txns
   let cashExp = 0, cardExp = 0;
   CATS.forEach(cat => {
-    loadTxns(curY, curM, cat.id).forEach(t => {
-      if(t.method === 'card') cardExp += (t.amount || 0);
-      else                    cashExp += (t.amount || 0);
-    });
+    const txns = loadTxns(curY, curM, cat.id);
+    if(txns.length > 0){
+      txns.forEach(t => {
+        if(t.method === 'card') cardExp += (t.amount || 0);
+        else                    cashExp += (t.amount || 0);
+      });
+    } else {
+      cashExp += (saved[cat.id] || 0);
+    }
   });
 
   // Transfers impact
@@ -3052,10 +3063,15 @@ function renderTransferTabBalance(){
   if(income === 0){ container.innerHTML = ''; return; }
   let cashExp = 0, cardExp = 0;
   CATS.forEach(cat => {
-    loadTxns(curYT, curMT, cat.id).forEach(t => {
-      if(t.method === 'card') cardExp += (t.amount || 0);
-      else                    cashExp += (t.amount || 0);
-    });
+    const txns = loadTxns(curYT, curMT, cat.id);
+    if(txns.length > 0){
+      txns.forEach(t => {
+        if(t.method === 'card') cardExp += (t.amount || 0);
+        else                    cashExp += (t.amount || 0);
+      });
+    } else {
+      cashExp += (saved[cat.id] || 0);
+    }
   });
   const trs    = loadTransfers(curYT, curMT);
   const c2c    = trs.filter(t=>t.dir==='card2cash').reduce((s,t)=>s+t.amount, 0);
