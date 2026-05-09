@@ -609,12 +609,20 @@
     <div class="qa-handle"></div>
     <div class="qa-title">⚡ إضافة سريعة</div>
     <div class="qa-cats" id="qa-cats"></div>
-    <div class="qa-amount-row">
-      <input type="text" id="qa-amount" class="qa-amount-inp" placeholder="المبلغ" inputmode="numeric">
-      <span id="qa-currency-lbl" style="font-weight:800;font-size:14px;color:var(--text2)">د.ع</span>
+    <div class="qa-bottom">
+      <div class="qa-pay-toggle">
+        <button class="qa-pay-btn qa-pay-active" id="qa-pmb-cash" onclick="setQAPayMethod('cash')">💵 كاش</button>
+        <button class="qa-pay-btn" id="qa-pmb-card" onclick="setQAPayMethod('card')">💳 بطاقة</button>
+      </div>
+      <div class="qa-amount-row">
+        <input type="text" id="qa-amount" class="qa-amount-inp" placeholder="0" inputmode="numeric" autocomplete="off">
+        <span id="qa-currency-lbl" class="qa-cur-lbl">د.ع</span>
+      </div>
+      <div class="qa-actions">
+        <button class="qa-cancel" onclick="closeQuickAdd()">إلغاء</button>
+        <button class="qa-add-btn" onclick="doQuickAdd()">✅ إضافة</button>
+      </div>
     </div>
-    <button class="qa-add-btn" onclick="doQuickAdd()">✅ إضافة</button>
-    <button class="qa-cancel" onclick="closeQuickAdd()">إلغاء</button>
   </div>
 </div>
 

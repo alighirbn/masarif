@@ -1210,49 +1210,78 @@ body.dark .mv-item.down { background:rgba(16,185,129,0.15); }
   .quick-add-fab:active { transform:scale(0.9); } }
 
 /* Quick Add Modal */
-.qa-modal { display:none; position:fixed; top:0;left:0;right:0;bottom:0;
+.qa-modal {
+  display:none; position:fixed; top:0;left:0;right:0;bottom:0;
   background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
-  z-index:1000; align-items:flex-end; justify-content:center; }
+  z-index:1000; align-items:flex-end; justify-content:center;
+}
 .qa-modal.active { display:flex; }
 .qa-content {
   background:var(--card); border-radius:28px 28px 0 0;
-  width:100%; max-width:480px; padding:24px 18px 36px;
+  width:100%; max-width:480px;
+  display:flex; flex-direction:column;
+  max-height:85dvh; max-height:85vh;
   animation:slideUp 0.3s ease;
+  padding:16px 16px 0;
 }
-.qa-handle { width:40px; height:4px; background:#e2e8f0; border-radius:4px; margin:0 auto 16px; }
-.qa-title { font-size:18px; font-weight:900; color:var(--dark); margin-bottom:16px; text-align:center; }
+.qa-handle { width:40px; height:4px; background:#e2e8f0; border-radius:4px; margin:0 auto 12px; flex-shrink:0; }
+.qa-title { font-size:17px; font-weight:900; color:var(--dark); margin-bottom:12px; text-align:center; flex-shrink:0; }
+/* Categories — scrollable, takes all available space */
 .qa-cats {
-  display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px;
-  max-height:200px; overflow-y:auto;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:7px;
+  overflow-y:auto; flex:1; min-height:0;
+  padding-bottom:8px;
 }
 .qa-cat-btn {
   background:#f8fafc; border:1.5px solid var(--border); border-radius:14px;
-  padding:10px 4px; text-align:center; cursor:pointer; transition:all 0.15s;
+  padding:9px 4px; text-align:center; cursor:pointer; transition:all 0.15s;
   font-family:'Cairo',sans-serif;
 }
 .qa-cat-btn.selected { border-color:var(--accent); background:#fff0f3; }
-.qa-cat-btn .qcb-icon { font-size:22px; display:block; }
-.qa-cat-btn .qcb-name { font-size:9px; font-weight:700; color:var(--text2); margin-top:4px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.qa-cat-btn .qcb-icon { font-size:20px; display:block; }
+.qa-cat-btn .qcb-name { font-size:9px; font-weight:700; color:var(--text2); margin-top:3px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 body.dark .qa-cat-btn { background:#1e293b; }
 body.dark .qa-cat-btn.selected { background:#2d0a12; border-color:var(--accent); }
-.qa-amount-row { display:flex; gap:10px; align-items:center; margin-bottom:16px; }
+/* Bottom — never shrinks, always visible */
+.qa-bottom {
+  flex-shrink:0; padding:10px 0 max(20px,env(safe-area-inset-bottom));
+  border-top:1px solid var(--border); margin-top:8px;
+}
+/* Cash / Card toggle */
+.qa-pay-toggle {
+  display:flex; gap:8px; margin-bottom:10px;
+}
+.qa-pay-btn {
+  flex:1; padding:9px; border:1.5px solid var(--border); border-radius:12px;
+  font-size:13px; font-weight:800; font-family:'Cairo',sans-serif;
+  background:var(--bg); color:var(--text2); cursor:pointer; transition:all .15s;
+}
+.qa-pay-btn.qa-pay-active { background:#e0f2fe; border-color:#3b82f6; color:#1e40af; }
+body.dark .qa-pay-btn.qa-pay-active { background:#0c1a35; border-color:#3b82f6; color:#93c5fd; }
+/* Amount row */
+.qa-amount-row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
 .qa-amount-inp {
-  flex:1; padding:14px 16px; border:2px solid var(--border); border-radius:14px;
+  flex:1; padding:13px 16px; border:2px solid var(--border); border-radius:14px;
   font-size:20px; font-weight:900; font-family:'Cairo',sans-serif;
   background:var(--card); color:var(--dark); text-align:center;
 }
 .qa-amount-inp:focus { outline:none; border-color:var(--accent); }
 body.dark .qa-amount-inp { border-color:#334155; }
+.qa-cur-lbl { font-weight:800; font-size:14px; color:var(--text2); flex-shrink:0; }
+/* Actions row */
+.qa-actions { display:flex; gap:8px; }
+.qa-cancel {
+  flex:1; padding:13px; background:#f1f5f9; border:none; border-radius:14px;
+  font-size:14px; font-weight:700; color:var(--text2); cursor:pointer;
+  font-family:'Cairo',sans-serif;
+}
+body.dark .qa-cancel { background:#334155; color:#f1f5f9; }
 .qa-add-btn {
-  width:100%; padding:15px; background:linear-gradient(135deg,var(--accent),#be123c);
-  color:#fff; border:none; border-radius:16px; font-size:17px; font-weight:900;
+  flex:2; padding:13px; background:linear-gradient(135deg,var(--accent),#be123c);
+  color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:900;
   cursor:pointer; font-family:'Cairo',sans-serif; transition:all 0.15s;
 }
 .qa-add-btn:active { transform:scale(0.97); }
-.qa-cancel { width:100%; margin-top:8px; padding:12px; background:#f1f5f9;
-  border:none; border-radius:14px; font-size:14px; font-weight:700;
-  color:var(--text2); cursor:pointer; font-family:'Cairo',sans-serif; }
-body.dark .qa-cancel { background:#334155; color:#f1f5f9; }
 
 /* ===== RECURRING CSS ===== */
 .recurring-suggest-box {

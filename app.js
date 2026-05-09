@@ -2625,10 +2625,18 @@ function applyAllSmartLimits(ids, amounts){
 
 // ==================== QUICK ADD ====================
 let qaSelectedCat = null;
+let qaPayMethod = 'cash';
+
+function setQAPayMethod(m){
+  qaPayMethod = m;
+  document.getElementById('qa-pmb-cash').classList.toggle('qa-pay-active', m==='cash');
+  document.getElementById('qa-pmb-card').classList.toggle('qa-pay-active', m==='card');
+}
 
 function openQuickAdd(){
-  const container = document.getElementById('qa-cats');
   qaSelectedCat = null;
+  qaPayMethod = 'cash';
+  const container = document.getElementById('qa-cats');
   container.innerHTML = CATS.map(c=>`
     <div class="qa-cat-btn" id="qa-cat-${c.id}" onclick="selectQACat('${c.id}')">
       <span class="qcb-icon">${c.icon}</span>
@@ -2636,8 +2644,8 @@ function openQuickAdd(){
     </div>`).join('');
   document.getElementById('qa-amount').value = '';
   document.getElementById('qa-currency-lbl').textContent = getCurrencyLabel();
+  setQAPayMethod('cash');
   document.getElementById('qa-modal').classList.add('active');
-  setTimeout(()=>document.getElementById('qa-amount').focus(), 300);
 }
 
 function selectQACat(catId){
@@ -2648,7 +2656,10 @@ function selectQACat(catId){
 
 function closeQuickAdd(){
   document.getElementById('qa-modal').classList.remove('active');
+  const content = document.querySelector('.qa-content');
+  if(content) content.style.transform = '';
   qaSelectedCat = null;
+  qaPayMethod = 'cash';
 }
 
 function doQuickAdd(){
@@ -2664,7 +2675,7 @@ function doQuickAdd(){
   const dateStr = `${today.getFullYear()}-${mm}-${dd}`;
 
   const txns = loadTxns(curY, curM, qaSelectedCat);
-  txns.push({ amount, desc: '', date: dateStr, id: Date.now() });
+  txns.push({ amount, desc: '', date: dateStr, method: qaPayMethod, id: Date.now() });
   saveTxns(curY, curM, qaSelectedCat, txns);
   syncTxnTotal(curY, curM, qaSelectedCat);
   doSaveMonth(true);
@@ -2680,6 +2691,15 @@ document.getElementById('qa-modal')?.addEventListener('click', function(e){
 document.getElementById('qa-amount')?.addEventListener('keydown', function(e){
   if(e.key === 'Enter') doQuickAdd();
 });
+// Lift modal above keyboard on mobile
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', ()=>{
+    const modal = document.getElementById('qa-modal');
+    if(!modal?.classList.contains('active')) return;
+    const offset = window.innerHeight - window.visualViewport.height;
+    document.querySelector('.qa-content').style.transform = `translateY(-${offset}px)`;
+  });
+}
 
 // ==================== SUPABASE AUTH & CLOUD SYNC ====================
 const SUPABASE_URL = 'https://vanuwxbrlpofwcykvmbj.supabase.co';
