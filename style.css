@@ -244,6 +244,7 @@ input, textarea, select { font-size: 16px !important; } /* prevents iOS zoom on 
   .modal { align-items: center; padding: 20px; }
   .modal-content { border-radius: 24px !important; max-height: 85vh; }
   .modal-handle { display: none; }
+  .modal-top-bar { margin-bottom: 8px; }
 
   /* Summary */
   .sum-grid { grid-template-columns: repeat(3, 1fr); }
@@ -497,7 +498,23 @@ body.dark .carry-income-row label { color: #6ee7b7; }
   animation:slideUp 0.3s ease;
 }
 @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-handle{width:40px;height:4px;background:#e2e8f0;border-radius:4px;margin:0 auto 20px}
+.modal-top-bar{
+  display:flex;align-items:center;justify-content:center;
+  position:relative;margin-bottom:16px;padding:2px 0;
+}
+.modal-handle{width:40px;height:4px;background:#e2e8f0;border-radius:4px;margin:0 auto}
+.modal-close-x{
+  position:absolute;right:0;
+  background:#f1f5f9;border:none;border-radius:50%;
+  width:36px;height:36px;font-size:17px;font-weight:700;
+  cursor:pointer;color:#64748b;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s,transform 0.1s;
+  line-height:1;
+}
+.modal-close-x:active{background:#e2e8f0;transform:scale(0.88);}
+body.dark .modal-close-x{background:#334155;color:#94a3b8;}
+body.dark .modal-close-x:active{background:#475569;}
 .modal-content h3{font-size:20px;margin-bottom:16px;color:var(--dark);font-weight:900}
 .limit-row{
   display:flex;align-items:center;gap:10px;margin-bottom:10px;

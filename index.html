@@ -421,7 +421,10 @@
 <!-- ===== TRANSACTIONS MODAL ===== -->
 <div id="txn-modal" class="modal">
   <div class="modal-content" style="max-width:520px">
-    <div class="modal-handle"></div>
+    <div class="modal-top-bar">
+      <div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeTxnModal()">✕</button>
+    </div>
     <div class="txn-modal-header">
       <h3 id="txn-modal-title">📋 تفاصيل المصاريف</h3>
       <div>
@@ -483,7 +486,10 @@
 <!-- ===== TRANSFER MODAL ===== -->
 <div id="transfer-modal" class="modal">
   <div class="modal-content" style="max-width:420px">
-    <div class="modal-handle"></div>
+    <div class="modal-top-bar">
+      <div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeTransferModal()">✕</button>
+    </div>
     <h3 style="margin-bottom:14px">💸 تحويل بين الكاش والبطاقة</h3>
 
     <div class="transfer-dir-toggle">
@@ -524,7 +530,10 @@
 <!-- ===== BILLS MODAL ===== -->
 <div id="bills-modal" class="modal">
   <div class="modal-content" style="max-width:520px">
-    <div class="modal-handle"></div>
+    <div class="modal-top-bar">
+      <div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeBillsModal()">✕</button>
+    </div>
     <h3>📅 الفواتير الشهرية المتكررة</h3>
     <div style="font-size:12px;color:#64748b;margin-bottom:12px;font-weight:600">سجّل فواتيرك الثابتة حتى يذكّرك التطبيق قبل موعد استحقاقها</div>
 
@@ -566,7 +575,10 @@
 <!-- ===== LIMITS MODAL ===== -->
 <div id="limits-modal" class="modal">
   <div class="modal-content" style="max-width:520px">
-    <div class="modal-handle"></div>
+    <div class="modal-top-bar">
+      <div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeLimitsModal()">✕</button>
+    </div>
     <h3>📊 تعيين الحدود القصوى</h3>
     <div id="limits-list"></div>
     <div class="total-limits" id="total-limits-info">المجموع: 0 د.ع</div>

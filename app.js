@@ -2728,6 +2728,7 @@ function applyCloudData(d){
     if(d.limits){ currentLimits = d.limits; saveLimitsToStorage(); }
     if(d.currency){ currentCurrency = d.currency; localStorage.setItem('preferred_currency', d.currency); }
     if(d.txns) restoreAllTxns(d.txns);
+    if(d.transfers) restoreAllTransfers(d.transfers);
     if(d.bills) saveBills(d.bills);
     if(d.notes) restoreAllNotes(d.notes);
     if(d.updated){
@@ -2754,6 +2755,7 @@ async function cloudSync(silent = false){
         limits: currentLimits,
         currency: currentCurrency,
         txns: getAllTxns(),
+        transfers: getAllTransfers(),
         bills: loadBills(),
         notes: getAllNotes(),
         updated: now
@@ -2840,6 +2842,22 @@ function getAllTxns(){
 function restoreAllTxns(txns){
   for(let k in txns){
     if(k.startsWith('txn_')) localStorage.setItem(k, txns[k]);
+  }
+}
+
+// Helper: collect all transfer data from localStorage
+function getAllTransfers(){
+  const result = {};
+  for(let k in localStorage){
+    if(k.startsWith('transfers_')) result[k] = localStorage[k];
+  }
+  return result;
+}
+
+// Helper: restore transfers from cloud
+function restoreAllTransfers(transfers){
+  for(let k in transfers){
+    if(k.startsWith('transfers_')) localStorage.setItem(k, transfers[k]);
   }
 }
 
