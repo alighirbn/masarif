@@ -762,11 +762,12 @@ body.dark .tr-dir-active { background:#1e3a5f !important; border-color:#3b82f6 !
 /* ===== NOTIFICATION TOAST ===== */
 .toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
-  background:var(--dark);color:#fff;padding:12px 24px;
+  background:#0d1b2a;color:#fff;padding:12px 24px;
   border-radius:50px;font-size:13px;font-weight:700;
   z-index:9999;transition:transform 0.3s ease;white-space:nowrap;
   box-shadow:0 8px 24px rgba(0,0,0,0.3);
 }
+body.dark .toast{background:#334155;color:#f1f5f9;}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
 /* ===== MISC ===== */
