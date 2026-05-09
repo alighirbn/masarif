@@ -1801,17 +1801,16 @@ function renderDashboard(){
     <div class="dash-card">
       <div class="dc-lbl">📉 المتبقي</div>
       ${income > 0 ? `
-        <div style="display:flex;justify-content:center;gap:14px;margin:4px 0 2px">
-          <div style="text-align:center">
-            <div style="font-size:10px;color:var(--text2);font-weight:700;margin-bottom:2px">💵 كاش</div>
-            <div class="dc-val ${cashBal < 0 ? 'red' : 'green'}" style="font-size:15px;line-height:1.1">${fmt(cashBal)}</div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin:6px 0 4px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;color:var(--text2);font-weight:700">💵 كاش</span>
+            <span class="dc-val ${cashBal < 0 ? 'red' : 'green'}" style="font-size:13px;line-height:1">${fmt(cashBal)} ${lbl}</span>
           </div>
-          <div style="text-align:center">
-            <div style="font-size:10px;color:var(--text2);font-weight:700;margin-bottom:2px">💳 بطاقة</div>
-            <div class="dc-val ${cardBal < 0 ? 'red' : 'green'}" style="font-size:15px;line-height:1.1">${fmt(cardBal)}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;color:var(--text2);font-weight:700">💳 بطاقة</span>
+            <span class="dc-val ${cardBal < 0 ? 'red' : 'green'}" style="font-size:13px;line-height:1">${fmt(cardBal)} ${lbl}</span>
           </div>
         </div>
-        <div class="dc-sub">${lbl}</div>
       ` : '<div class="dc-val">—</div><div class="dc-sub">لا يوجد دخل</div>'}
       ${income > 0 ? trendBadge(remaining, remainingPrev, false) : ''}
     </div>
