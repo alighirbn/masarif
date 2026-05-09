@@ -1060,6 +1060,152 @@ function exportCSV(){
   showToast('📊 تم تصدير CSV بنجاح');
 }
 
+// ===== PDF EXPORT =====
+function exportPDF(){
+  const s = loadM(curY, curM);
+  const income = s.income || 0;
+  const emergency = s.emergency || 0;
+  const lbl = getCurrencyLabel();
+
+  const allTxns = [];
+  CATS.forEach(cat => {
+    loadTxns(curY, curM, cat.id).forEach(t => {
+      allTxns.push({ ...t, catId: cat.id, catName: cat.name, catIcon: cat.icon });
+    });
+  });
+
+  const totalExp = allTxns.reduce((a,t) => a + (t.amount||0), 0);
+  const remaining = income - totalExp - emergency;
+
+  const catSummary = CATS.map(cat => {
+    const total = allTxns.filter(t => t.catId === cat.id).reduce((a,t) => a+(t.amount||0), 0);
+    return { ...cat, total };
+  }).filter(c => c.total > 0).sort((a,b) => b.total - a.total);
+
+  const dayGroups = {};
+  allTxns.forEach(t => {
+    const date = t.date || '';
+    if(!dayGroups[date]) dayGroups[date] = { txns: [], total: 0 };
+    dayGroups[date].txns.push(t);
+    dayGroups[date].total += (t.amount||0);
+  });
+  const dayKeys = Object.keys(dayGroups).filter(k => k.length === 10).sort().reverse();
+
+  const catRows = catSummary.map(c => `
+    <tr>
+      <td>${c.icon} ${c.name}</td>
+      <td style="text-align:center">${fmt(c.total)} ${lbl}</td>
+      <td style="text-align:center">${income > 0 ? Math.round(c.total/income*100) : 0}%</td>
+    </tr>`).join('');
+
+  let txnRows = '';
+  dayKeys.forEach(date => {
+    const g = dayGroups[date];
+    txnRows += `<tr style="background:#fef9f0">
+      <td colspan="4" style="font-weight:700;color:#92400e;padding:8px">📅 ${formatArabicDate(date)}</td>
+      <td style="font-weight:700;color:#92400e;text-align:center">${fmt(g.total)} ${lbl}</td>
+    </tr>`;
+    g.txns.sort((a,b) => (b.amount||0)-(a.amount||0)).forEach(t => {
+      txnRows += `<tr>
+        <td>${t.catIcon} ${t.catName}</td>
+        <td colspan="2" style="color:#64748b">${t.desc || '—'}</td>
+        <td style="text-align:center">${t.method === 'card' ? '💳' : '💵'}</td>
+        <td style="text-align:center;font-weight:600">${fmt(t.amount)} ${lbl}</td>
+      </tr>`;
+    });
+  });
+
+  const emergencyRow = emergency > 0 ? `
+    <div class="sum-card">
+      <div class="lbl">الطوارئ</div>
+      <div class="val" style="color:#dc2626">${fmt(emergency)}</div>
+      <div class="lbl">${lbl}</div>
+    </div>` : '';
+
+  const noTxns = `<div style="text-align:center;color:#94a3b8;padding:30px 0;font-size:14px">📭 لا توجد مصاريف مسجلة لهذا الشهر</div>`;
+
+  const pdfHTML = `
+    <div style="font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:rtl;background:#fff;color:#1e293b;font-size:12px;padding:0">
+      <div style="background:linear-gradient(135deg,#f97316,#ef4444);color:#fff;padding:20px;text-align:center;border-radius:10px;margin-bottom:16px">
+        <div style="font-size:24px;margin-bottom:4px">🏠 مصاريف البيت</div>
+        <div style="font-size:14px;opacity:.9">كشف شهر: ${mLabel(curY, curM)}</div>
+        <div style="font-size:11px;opacity:.75;margin-top:2px">صدر بتاريخ: ${new Date().toLocaleDateString('ar-SA')}</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <div class="sum-card" style="flex:1;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;text-align:center">
+          <div class="lbl" style="font-size:11px;color:#64748b;margin-bottom:4px">الدخل</div>
+          <div class="val" style="font-size:20px;font-weight:700;color:#16a34a">${fmt(income)}</div>
+          <div class="lbl" style="font-size:11px;color:#64748b">${lbl}</div>
+        </div>
+        <div class="sum-card" style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;text-align:center">
+          <div class="lbl" style="font-size:11px;color:#64748b;margin-bottom:4px">المصاريف</div>
+          <div class="val" style="font-size:20px;font-weight:700;color:#dc2626">${fmt(totalExp)}</div>
+          <div class="lbl" style="font-size:11px;color:#64748b">${lbl}</div>
+        </div>
+        ${emergencyRow ? `<div class="sum-card" style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;text-align:center">
+          <div class="lbl" style="font-size:11px;color:#64748b;margin-bottom:4px">الطوارئ</div>
+          <div class="val" style="font-size:20px;font-weight:700;color:#dc2626">${fmt(emergency)}</div>
+          <div class="lbl" style="font-size:11px;color:#64748b">${lbl}</div>
+        </div>` : ''}
+        <div class="sum-card" style="flex:1;background:${remaining>=0?'#f0fdf4':'#fef2f2'};border:1px solid ${remaining>=0?'#bbf7d0':'#fecaca'};border-radius:8px;padding:12px;text-align:center">
+          <div class="lbl" style="font-size:11px;color:#64748b;margin-bottom:4px">المتبقي</div>
+          <div class="val" style="font-size:20px;font-weight:700;color:${remaining>=0?'#16a34a':'#dc2626'}">${fmt(remaining)}</div>
+          <div class="lbl" style="font-size:11px;color:#64748b">${lbl}</div>
+        </div>
+      </div>
+      ${catSummary.length > 0 ? `
+      <div style="font-size:14px;font-weight:700;color:#475569;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">توزيع المصاريف</div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+        <thead>
+          <tr style="background:#f1f5f9">
+            <th style="padding:8px;text-align:right;font-size:11px;color:#475569;border-bottom:1px solid #e2e8f0">الفئة</th>
+            <th style="padding:8px;text-align:center;font-size:11px;color:#475569;border-bottom:1px solid #e2e8f0">المبلغ</th>
+            <th style="padding:8px;text-align:center;font-size:11px;color:#475569;border-bottom:1px solid #e2e8f0">النسبة من الدخل</th>
+          </tr>
+        </thead>
+        <tbody>${catRows}</tbody>
+      </table>` : ''}
+      <div style="font-size:14px;font-weight:700;color:#475569;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">تفاصيل المعاملات</div>
+      ${dayKeys.length > 0 ? `
+      <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+        <thead>
+          <tr style="background:#f1f5f9">
+            <th style="padding:8px;text-align:right;font-size:11px;color:#475569;border-bottom:1px solid #e2e8f0">الفئة</th>
+            <th style="padding:8px;text-align:right;font-size:11px;color:#475569;border-bottom:1px solid #e2e8f0" colspan="2">الوصف</th>
+            <th style="padding:8px;text-align:center;font-size:11px;color:#475569;border-bottom:1px solid #e2e8f0">الطريقة</th>
+            <th style="padding:8px;text-align:center;font-size:11px;color:#475569;border-bottom:1px solid #e2e8f0">المبلغ</th>
+          </tr>
+        </thead>
+        <tbody>${txnRows}</tbody>
+      </table>` : noTxns}
+      <div style="text-align:center;font-size:10px;color:#94a3b8;margin-top:20px;padding-top:10px;border-top:1px solid #e2e8f0">
+        مصاريف البيت الذكي — ${new Date().toLocaleDateString('ar-SA')}
+      </div>
+    </div>`;
+
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:190mm;background:#fff;padding:10mm';
+  container.innerHTML = pdfHTML;
+  document.body.appendChild(container);
+
+  const opt = {
+    margin: 0,
+    filename: `كشف-${mLabel(curY, curM)}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  showToast('⏳ جاري إنشاء PDF...');
+  html2pdf().set(opt).from(container).save().then(() => {
+    document.body.removeChild(container);
+    showToast('📄 تم تصدير PDF بنجاح');
+  }).catch(() => {
+    document.body.removeChild(container);
+    showToast('❌ حدث خطأ أثناء إنشاء PDF');
+  });
+}
+
 function importData(event){
   const file = event.target.files[0];
   if(!file) return;
