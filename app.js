@@ -786,6 +786,7 @@ function renderCustomCatsList(){
   CATS.forEach((cat,i)=>{
     html += `<div class="custom-cat-row" id="ccat-${i}">
       <div class="ccat-top">
+        <button class="drag-handle" title="اسحب لإعادة الترتيب">⠿</button>
         <button class="emoji-pick" onclick="pickEmoji(${i})" title="اختر رمز">${cat.icon}</button>
         <input type="text" value="${cat.name}" id="ccat-name-${i}" placeholder="اسم الفئة"
           onblur="onCatNameBlur(${i})" onkeydown="if(event.key==='Enter')this.blur()">
@@ -2858,6 +2859,91 @@ function initPullToRefresh(){
   }
 }
 
+// ==================== CATEGORY DRAG SORT ====================
+function initCatDragSort(){
+  const container = document.getElementById('custom-cats-list');
+  if(!container) return;
+
+  let dragIdx = -1, overIdx = -1, dragRow = null, ghost = null, originY = 0;
+
+  function getRows(){ return [...container.querySelectorAll('.custom-cat-row')]; }
+
+  function idxAt(clientY){
+    const rows = getRows();
+    for(let i = 0; i < rows.length; i++){
+      const b = rows[i].getBoundingClientRect();
+      if(clientY < b.top + b.height / 2) return i;
+    }
+    return Math.max(0, rows.length - 1);
+  }
+
+  function clearHL(){
+    getRows().forEach(r => r.classList.remove('drag-over-top','drag-over-bottom'));
+  }
+
+  container.addEventListener('touchstart', e => {
+    if(!e.target.closest('.drag-handle')) return;
+    e.preventDefault();
+    syncCatFormState();
+
+    dragRow = e.target.closest('.custom-cat-row');
+    const rows = getRows();
+    dragIdx = overIdx = rows.indexOf(dragRow);
+
+    const rect = dragRow.getBoundingClientRect();
+    originY = e.touches[0].clientY - rect.top;
+
+    ghost = dragRow.cloneNode(true);
+    ghost.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;
+      width:${rect.width}px;opacity:0.93;pointer-events:none;z-index:9999;
+      box-shadow:0 8px 32px rgba(0,0,0,0.22);border-radius:14px;
+      background:var(--card);transform:scale(1.02)`;
+    document.body.appendChild(ghost);
+    dragRow.style.opacity = '0.25';
+
+  }, { passive: false });
+
+  container.addEventListener('touchmove', e => {
+    if(dragIdx < 0 || !ghost) return;
+    e.preventDefault();
+
+    const y = e.touches[0].clientY;
+    ghost.style.top = (y - originY) + 'px';
+
+    const idx = idxAt(y);
+    if(idx !== overIdx){
+      clearHL();
+      overIdx = idx;
+      if(overIdx !== dragIdx){
+        const rows = getRows();
+        rows[overIdx]?.classList.add(overIdx < dragIdx ? 'drag-over-top' : 'drag-over-bottom');
+      }
+    }
+  }, { passive: false });
+
+  const done = () => {
+    if(dragIdx < 0) return;
+    clearHL();
+    if(dragRow) dragRow.style.opacity = '';
+    if(ghost){ ghost.remove(); ghost = null; }
+
+    if(overIdx >= 0 && overIdx !== dragIdx){
+      const [moved] = CATS.splice(dragIdx, 1);
+      CATS.splice(overIdx, 0, moved);
+      saveCats();
+      renderEntry();
+      renderCustomCatsList();
+      showToast('✓ تم حفظ الترتيب');
+    }
+
+    dragIdx = overIdx = -1;
+    dragRow = null;
+  };
+
+  container.addEventListener('touchend',    done);
+  container.addEventListener('touchcancel', done);
+}
+
 // ==================== INIT ====================
 function initApp(){
   loadCats();
@@ -2874,6 +2960,7 @@ function initApp(){
   updateTabsTop();
   checkRecurringSuggestions();
   renderCustomCatsList();
+  initCatDragSort();
   showWelcomeIfNew();
   // Open the most relevant settings group by default
   document.querySelector('#tab-settings .settings-group:nth-of-type(2)')?.classList.add('open');

@@ -527,10 +527,21 @@ body.dark .carry-income-row label { color: #6ee7b7; }
 .custom-cat-row{
   display:flex;flex-direction:column;gap:8px;margin-bottom:8px;
   padding:10px;background:#f8fafc;border-radius:14px;
+  user-select:none;
 }
+.custom-cat-row.drag-over-top    { border-top: 2.5px solid var(--accent); }
+.custom-cat-row.drag-over-bottom { border-bottom: 2.5px solid var(--accent); }
 .ccat-top{
   display:flex;align-items:center;gap:8px;
 }
+.drag-handle{
+  flex-shrink:0;width:28px;height:44px;
+  background:none;border:none;cursor:grab;
+  color:#cbd5e1;font-size:18px;letter-spacing:-1px;
+  display:flex;align-items:center;justify-content:center;
+  touch-action:none;
+}
+.drag-handle:active{ color:var(--accent);cursor:grabbing; }
 .custom-cat-row input[type=text]{
   flex:1;min-width:0;padding:9px 12px;border:1.5px solid var(--border);
   border-radius:10px;font-size:13px;font-weight:600;font-family:'Cairo',sans-serif;
