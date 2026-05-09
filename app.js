@@ -1637,6 +1637,22 @@ function renderDashboard(){
   const out = document.getElementById('dashboard-content');
   if(!out) return;
 
+  // --- Cash / card breakdown ---
+  const incCard = s.incomeCard || 0;
+  const incCash = income - incCard;
+  let cashExp = 0, cardExp = 0;
+  CATS.forEach(cat => {
+    loadTxns(curYD, curMD, cat.id).forEach(t => {
+      if(t.method === 'card') cardExp += (t.amount || 0);
+      else                    cashExp += (t.amount || 0);
+    });
+  });
+  const trsD    = loadTransfers(curYD, curMD);
+  const c2cD    = trsD.filter(t=>t.dir==='card2cash').reduce((a,t)=>a+t.amount, 0);
+  const cash2cD = trsD.filter(t=>t.dir==='cash2card').reduce((a,t)=>a+t.amount, 0);
+  const cashBal = incCash - cashExp - emergency + c2cD - cash2cD;
+  const cardBal = incCard - cardExp - c2cD + cash2cD;
+
   // --- Previous month data for comparisons ---
   let prevM = curMD - 1, prevY = curYD;
   if(prevM < 0){ prevM = 11; prevY--; }
@@ -1782,8 +1798,19 @@ function renderDashboard(){
     </div>
     <div class="dash-card">
       <div class="dc-lbl">📉 المتبقي</div>
-      <div class="dc-val ${remaining < 0 ? 'red' : 'green'}">${income > 0 ? fmt(remaining) : '—'}</div>
-      <div class="dc-sub">${remaining < 0 ? 'عجز' : 'فائض'}</div>
+      ${income > 0 ? `
+        <div style="display:flex;justify-content:center;gap:14px;margin:4px 0 2px">
+          <div style="text-align:center">
+            <div style="font-size:10px;color:var(--text2);font-weight:700;margin-bottom:2px">💵 كاش</div>
+            <div class="dc-val ${cashBal < 0 ? 'red' : 'green'}" style="font-size:15px;line-height:1.1">${fmt(cashBal)}</div>
+          </div>
+          ${incCard > 0 ? `<div style="text-align:center">
+            <div style="font-size:10px;color:var(--text2);font-weight:700;margin-bottom:2px">💳 بطاقة</div>
+            <div class="dc-val ${cardBal < 0 ? 'red' : 'green'}" style="font-size:15px;line-height:1.1">${fmt(cardBal)}</div>
+          </div>` : ''}
+        </div>
+        <div class="dc-sub">${lbl}</div>
+      ` : '<div class="dc-val">—</div><div class="dc-sub">لا يوجد دخل</div>'}
       ${income > 0 ? trendBadge(remaining, remainingPrev, false) : ''}
     </div>
     <div class="dash-card">
