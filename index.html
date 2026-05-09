@@ -81,6 +81,7 @@
     <div class="tab" onclick="switchTab('entry')">📝 إدخال</div>
     <div class="tab" onclick="switchTab('transfer')">💸 تحويل</div>
     <div class="tab" onclick="switchTab('compare')">⚖️ مقارنة</div>
+    <div class="tab" onclick="switchTab('statement')">📆 كشف</div>
     <div class="tab" onclick="switchTab('settings')">⚙️ إعدادات</div>
   </div>
 
@@ -257,6 +258,16 @@
       <div class="txn-list-title">📌 تحويلات الشهر</div>
       <div id="transfer-tab-list" class="txn-list"></div>
     </div>
+  </div>
+
+  <!-- ===== STATEMENT TAB ===== -->
+  <div id="tab-statement" class="section">
+    <div class="month-bar">
+      <button onclick="changeMonthSt(-1)">◀</button>
+      <span class="month-label" id="month-label-st"></span>
+      <button onclick="changeMonthSt(1)">▶</button>
+    </div>
+    <div id="statement-content"></div>
   </div>
 
   <!-- ===== COMPARE TAB ===== -->

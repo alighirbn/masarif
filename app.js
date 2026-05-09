@@ -53,6 +53,7 @@ let hasUnsavedChanges = false;
 const now = new Date();
 let curY = now.getFullYear(), curM = now.getMonth();
 let curYS = curY, curMS = curM;
+let curYSt = now.getFullYear(), curMSt = now.getMonth();
 
 // ==================== STORAGE ====================
 function mKey(y,m){ return y+'-'+String(m+1).padStart(2,'0'); }
@@ -1101,8 +1102,164 @@ function copyLimitsToMonth(){
 }
 
 // ==================== TABS ====================
+// ==================== STATEMENT TAB ====================
+function changeMonthSt(d){
+  curMSt += d;
+  if(curMSt > 11){ curMSt = 0; curYSt++; }
+  if(curMSt < 0){ curMSt = 11; curYSt--; }
+  renderStatement();
+}
+
+function scrollToDay(dateStr){
+  const el = document.getElementById('stmt-day-' + dateStr);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function renderStatement(){
+  const labelEl = document.getElementById('month-label-st');
+  if(labelEl) labelEl.textContent = mLabel(curYSt, curMSt);
+  const s = loadM(curYSt, curMSt);
+  const income = s.income || 0;
+  const emergency = s.emergency || 0;
+  const lbl = getCurrencyLabel();
+  const out = document.getElementById('statement-content');
+  if(!out) return;
+
+  // Collect all transactions for the month across all categories
+  const allTxns = [];
+  CATS.forEach(cat => {
+    const txns = loadTxns(curYSt, curMSt, cat.id);
+    txns.forEach(t => {
+      allTxns.push({ ...t, catId: cat.id, catName: cat.name, catIcon: cat.icon });
+    });
+  });
+
+  // Daily totals for calendar heat map
+  const dailyTotals = {};
+  allTxns.forEach(t => {
+    const d = t.date || '';
+    if(d.length === 10){
+      const day = parseInt(d.slice(8,10));
+      if(day >= 1 && day <= 31) dailyTotals[day] = (dailyTotals[day] || 0) + (t.amount || 0);
+    }
+  });
+
+  const totalExp = allTxns.reduce((a,t) => a + (t.amount || 0), 0);
+  const remaining = income - totalExp - emergency;
+
+  // ---- Monthly summary ----
+  const summaryHTML = `
+    <div class="stmt-summary">
+      <div class="stmt-sum-item">
+        <div class="stmt-sum-label">الدخل</div>
+        <div class="stmt-sum-val income-color">${fmt(income)}</div>
+        <div class="stmt-sum-label">${lbl}</div>
+      </div>
+      <div class="stmt-sum-divider"></div>
+      <div class="stmt-sum-item">
+        <div class="stmt-sum-label">المصاريف</div>
+        <div class="stmt-sum-val expense-color">${fmt(totalExp)}</div>
+        <div class="stmt-sum-label">${lbl}</div>
+      </div>
+      <div class="stmt-sum-divider"></div>
+      <div class="stmt-sum-item">
+        <div class="stmt-sum-label">المتبقي</div>
+        <div class="stmt-sum-val ${remaining >= 0 ? 'income-color' : 'expense-color'}">${fmt(remaining)}</div>
+        <div class="stmt-sum-label">${lbl}</div>
+      </div>
+    </div>`;
+
+  // ---- Calendar heat map ----
+  const daysInMonth = new Date(curYSt, curMSt + 1, 0).getDate();
+  // JS: 0=Sun,1=Mon,...,6=Sat → Arabic week starts Saturday (Sat=6 in JS → col 0)
+  const arabicDayOrder = [6, 0, 1, 2, 3, 4, 5];
+  const arabicDayNames = ['سبت','أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة'];
+  const firstDayJS = new Date(curYSt, curMSt, 1).getDay();
+  const offset = arabicDayOrder.indexOf(firstDayJS);
+
+  const maxAmt = Object.values(dailyTotals).length > 0 ? Math.max(...Object.values(dailyTotals)) : 0;
+  const today = new Date();
+  const isCurrentMonth = curYSt === today.getFullYear() && curMSt === today.getMonth();
+
+  let calCells = arabicDayNames.map(n => `<div class="stmt-cal-header">${n}</div>`).join('');
+  for(let i = 0; i < offset; i++) calCells += `<div class="stmt-cal-cell empty"></div>`;
+  for(let d = 1; d <= daysInMonth; d++){
+    const amt = dailyTotals[d] || 0;
+    const ratio = maxAmt > 0 ? amt / maxAmt : 0;
+    const level = amt === 0 ? 0 : ratio < 0.25 ? 1 : ratio < 0.5 ? 2 : ratio < 0.75 ? 3 : 4;
+    const isToday = isCurrentMonth && d === today.getDate();
+    const dateStr = `${curYSt}-${String(curMSt+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    calCells += `<div class="stmt-cal-cell level-${level}${isToday ? ' today' : ''}" onclick="scrollToDay('${dateStr}')">
+      <div class="stmt-cal-day">${d}</div>
+      ${amt > 0 ? `<div class="stmt-cal-amt">${fmt(amt)}</div>` : ''}
+    </div>`;
+  }
+
+  const calHTML = `
+    <div class="stmt-cal-wrap">
+      <div class="stmt-cal-title">🗓️ إنفاق يومي — ${mLabel(curYSt, curMSt)}</div>
+      <div class="stmt-cal-grid">${calCells}</div>
+      <div class="stmt-cal-legend">
+        أقل <span style="background:#fef3c7;border:1px solid #d97706"></span>
+        <span style="background:#fed7aa"></span>
+        <span style="background:#fca5a5"></span>
+        <span style="background:#ef4444"></span> أكثر
+      </div>
+    </div>`;
+
+  // ---- Daily grouped statement ----
+  // Group by date string
+  const dayGroups = {};
+  allTxns.forEach(t => {
+    const date = t.date || '';
+    if(!dayGroups[date]) dayGroups[date] = { txns: [], total: 0 };
+    dayGroups[date].txns.push(t);
+    dayGroups[date].total += (t.amount || 0);
+  });
+  // Sort within each day by amount desc
+  Object.values(dayGroups).forEach(g => g.txns.sort((a,b) => (b.amount||0)-(a.amount||0)));
+
+  const dayKeys = Object.keys(dayGroups).filter(k => k.length === 10).sort().reverse();
+
+  let stmtHTML = '';
+  if(dayKeys.length === 0){
+    stmtHTML = `<div class="stmt-empty">📭 لا توجد مصاريف مسجلة لهذا الشهر</div>`;
+  } else {
+    dayKeys.forEach(date => {
+      const g = dayGroups[date];
+      const dateLabel = formatArabicDate(date);
+      const txnsHTML = g.txns.map(t => {
+        const method = t.method === 'card'
+          ? `<span class="stmt-method" title="بطاقة">💳</span>`
+          : `<span class="stmt-method" title="كاش">💵</span>`;
+        return `<div class="stmt-txn">
+          <span class="stmt-txn-icon">${t.catIcon}</span>
+          <div class="stmt-txn-info">
+            <div class="stmt-txn-name">${t.catName}</div>
+            ${t.desc ? `<div class="stmt-txn-desc">${t.desc}</div>` : ''}
+          </div>
+          <div class="stmt-txn-right">
+            ${method}
+            <span class="stmt-txn-amount">-${fmt(t.amount)} ${lbl}</span>
+          </div>
+        </div>`;
+      }).join('');
+
+      stmtHTML += `<div class="stmt-day-group" id="stmt-day-${date}">
+        <div class="stmt-day-header">
+          <span class="stmt-day-date">📅 ${dateLabel}</span>
+          <span class="stmt-day-total">${fmt(g.total)} ${lbl}</span>
+        </div>
+        <div class="stmt-day-txns">${txnsHTML}</div>
+      </div>`;
+    });
+  }
+
+  out.innerHTML = summaryHTML + calHTML + `<div class="stmt-list">${stmtHTML}</div>`;
+}
+
 function switchTab(t){
-  const tabNames = ['dashboard','entry','transfer','compare','settings'];
+  const tabNames = ['dashboard','entry','transfer','compare','statement','settings'];
   document.querySelectorAll('.tab').forEach((el,i)=>{
     el.classList.toggle('active', tabNames[i]===t);
   });
@@ -1111,6 +1268,7 @@ function switchTab(t){
   if(t==='dashboard'){ renderDashboard(); }
   if(t==='transfer'){ renderTransferTab(); }
   if(t==='compare'){ populatePickers(); renderCompare(); }
+  if(t==='statement'){ renderStatement(); }
   if(t==='settings'){ renderCustomCatsList(); updateStorageInfo(); }
   // If leaving entry tab with unsaved changes, trigger auto-save
   if(t !== 'entry' && hasUnsavedChanges){
