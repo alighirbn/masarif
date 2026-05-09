@@ -574,6 +574,29 @@ body.dark .carry-income-row label { color: #6ee7b7; }
 .cat-type-btn.active-ess{background:#dcfce7;border-color:#22c55e;color:#15803d}
 .cat-type-btn.active-opt{background:#fef3c7;border-color:#f59e0b;color:#b45309}
 
+/* ===== INCOME CARD SPLIT ===== */
+.income-card-row {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; padding:8px 12px;
+  background:linear-gradient(135deg,#eff6ff,#dbeafe);
+  border:1.5px solid #bfdbfe; border-radius:12px;
+  margin-top:-6px; margin-bottom:8px;
+}
+.icr-label { font-size:13px; font-weight:800; color:#1d4ed8; white-space:nowrap; }
+body.dark .income-card-row { background:#1e3a5f; border-color:#3b82f6; }
+body.dark .icr-label { color:#60a5fa; }
+
+/* ===== BALANCE SUMMARY ===== */
+.balance-summary-box {
+  background:var(--card); border-radius:14px; padding:12px 14px;
+  box-shadow:var(--shadow); margin-bottom:10px;
+  border-right:4px solid var(--accent);
+}
+.bsb-title { font-size:12px; font-weight:800; color:var(--text2); margin-bottom:8px; }
+.bsb-row   { display:flex; justify-content:space-between; align-items:center; padding:4px 0; }
+.bsb-label { font-size:13px; font-weight:700; color:var(--dark); }
+.bsb-val   { font-size:15px; font-weight:900; }
+
 /* ===== TRANSFERS ===== */
 .transfer-add-btn {
   width:100%; padding:11px; margin-bottom:10px;
@@ -594,7 +617,8 @@ body.dark .transfer-add-btn { background:#1e3a5f; border-color:#3b82f6; color:#6
 .transfer-item.tr-cash2card { border-right:4px solid #3b82f6; }
 .tr-icon { font-size:22px; flex-shrink:0; }
 .tr-info { flex:1; min-width:0; }
-.tr-dir-label { font-size:13px; font-weight:800; color:var(--dark); }
+.tr-dir-label { font-size:13px; font-weight:800; color:var(--dark); display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.tr-dir-desc  { font-size:11px; font-weight:600; color:var(--text2); }
 .tr-meta { font-size:11px; color:#94a3b8; font-weight:600; margin-top:2px; }
 .tr-amount { font-size:14px; font-weight:900; color:var(--accent); white-space:nowrap; }
 .transfers-empty { font-size:12px; color:#94a3b8; font-weight:600; text-align:center; padding:10px; }

@@ -296,6 +296,7 @@ function renderEntry(){
   list.innerHTML = html;
 
   document.getElementById('inp-income').value = saved.income||'';
+  document.getElementById('inp-income-card').value = saved.incomeCard||'';
   document.getElementById('inp-emergency').value = saved.emergency||'';
   document.getElementById('inp-saving-goal').value = saved.savingGoal||'';
   document.getElementById('save-tag').textContent = '';
@@ -309,6 +310,7 @@ function renderEntry(){
   updateTabsTop();
   updateStorageInfo();
   renderTransfers();
+  renderBalanceSummary();
 }
 
 // ==================== CAT INPUT (live) ====================
@@ -368,6 +370,7 @@ function doSaveMonth(isAuto){
   const sgEl  = document.getElementById('inp-saving-goal');
   calcInput(incEl); calcInput(emEl); calcInput(sgEl);
   data.income     = parseFloat(incEl.value)||0;
+  data.incomeCard = parseFloat(document.getElementById('inp-income-card')?.value)||0;
   data.emergency  = parseFloat(emEl.value)||0;
   data.savingGoal = parseFloat(sgEl.value)||0;
 
@@ -2816,6 +2819,54 @@ function restoreAllTxns(txns){
 // Auto-sync every 3 minutes when logged in
 setInterval(()=>{ if(currentUser) cloudSync(true); }, 3 * 60 * 1000);
 
+// ==================== BALANCE SUMMARY ====================
+function renderBalanceSummary(){
+  const container = document.getElementById('balance-summary');
+  if(!container) return;
+
+  const saved    = loadM(curY, curM);
+  const income   = parseFloat(document.getElementById('inp-income')?.value) || saved.income || 0;
+  const incCard  = parseFloat(document.getElementById('inp-income-card')?.value) || saved.incomeCard || 0;
+  const emergency= parseFloat(document.getElementById('inp-emergency')?.value) || saved.emergency || 0;
+  const incCash  = income - incCard;
+
+  if(income === 0){ container.innerHTML = ''; return; }
+
+  // Sum cash/card spending from all category transactions
+  let cashExp = 0, cardExp = 0;
+  CATS.forEach(cat => {
+    loadTxns(curY, curM, cat.id).forEach(t => {
+      if(t.method === 'card') cardExp += (t.amount || 0);
+      else                    cashExp += (t.amount || 0);
+    });
+  });
+
+  // Transfers impact
+  const trs      = loadTransfers(curY, curM);
+  const c2c      = trs.filter(t=>t.dir==='card2cash').reduce((s,t)=>s+t.amount,0); // card→cash
+  const cash2c   = trs.filter(t=>t.dir==='cash2card').reduce((s,t)=>s+t.amount,0); // cash→card
+
+  const cashBal  = incCash  - cashExp - emergency + c2c - cash2c;
+  const cardBal  = incCard  - cardExp - c2c + cash2c;
+  const lbl      = getCurrencyLabel();
+
+  function balRow(icon, label, val){
+    const neg   = val < 0;
+    const color = neg ? '#dc2626' : '#15803d';
+    const sign  = neg ? '−' : '';
+    return `<div class="bsb-row">
+      <span class="bsb-label">${icon} ${label}</span>
+      <span class="bsb-val" style="color:${color}">${sign}${fmt(Math.abs(val))} ${lbl}</span>
+    </div>`;
+  }
+
+  container.innerHTML = `<div class="balance-summary-box">
+    <div class="bsb-title">💰 الرصيد المتبقي</div>
+    ${balRow('💵','كاش', cashBal)}
+    ${incCard > 0 ? balRow('💳','بطاقة', cardBal) : ''}
+  </div>`;
+}
+
 // ==================== CASH/CARD TRANSFERS ====================
 function trKey(y, m){ return `transfers_${mKey(y,m)}`; }
 function loadTransfers(y, m){
@@ -2856,6 +2907,7 @@ function addTransfer(){
   saveTransfers(curY, curM, transfers);
   closeTransferModal();
   renderTransfers();
+  renderBalanceSummary();
   if(!_applyingCloudData){ setLocalUpdated(); scheduleCloudSync(); }
   const dirLabel = selectedTransferDir === 'card2cash' ? '💳→💵' : '💵→💳';
   showToast(`✅ تم تسجيل التحويل ${dirLabel} ${fmt(amount)} ${getCurrencyLabel()}`);
@@ -2871,6 +2923,7 @@ async function deleteTransfer(idx){
   transfers.splice(idx, 1);
   saveTransfers(curY, curM, transfers);
   renderTransfers();
+  renderBalanceSummary();
 }
 
 function renderTransfers(){
@@ -2885,13 +2938,14 @@ function renderTransfers(){
   container.innerHTML = [...transfers].reverse().map((tr, ri) => {
     const i = transfers.length - 1 - ri;
     const isCard2Cash = tr.dir === 'card2cash';
-    const dirLabel = isCard2Cash ? '💳 → 💵' : '💵 → 💳';
+    const dirArrow = `<bdi dir="ltr">${isCard2Cash ? '💳 → 💵' : '💵 → 💳'}</bdi>`;
+    const dirDesc  = isCard2Cash ? 'سحب كاش من البطاقة' : 'إيداع كاش في البطاقة';
     const dirClass = isCard2Cash ? 'tr-card2cash' : 'tr-cash2card';
     const dateStr  = tr.date ? formatArabicDate(tr.date) : '';
     return `<div class="transfer-item ${dirClass}">
       <div class="tr-icon">${isCard2Cash ? '🏧' : '🏦'}</div>
       <div class="tr-info">
-        <div class="tr-dir-label">${dirLabel}</div>
+        <div class="tr-dir-label">${dirArrow} <span class="tr-dir-desc">${dirDesc}</span></div>
         <div class="tr-meta">${tr.note ? tr.note+' · ' : ''}${dateStr}</div>
       </div>
       <div class="tr-amount">${fmt(tr.amount)} ${lbl}</div>

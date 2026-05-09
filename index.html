@@ -136,6 +136,16 @@
           </div>
         </div>
 
+        <div class="income-card-row">
+          <span class="icr-label">💳 منه رصيد بطاقة</span>
+          <div class="inp-wrap" style="max-width:180px">
+            <input type="text" id="inp-income-card" placeholder="0"
+              oninput="calcInput(this); markUnsaved(); renderBalanceSummary()"
+              inputmode="numeric">
+            <span id="currency-lbl-icard">د.ع</span>
+          </div>
+        </div>
+
         <div class="carry-income-row">
           <input type="checkbox" id="carry-income-cb" onchange="saveCarryIncomePref()">
           <label for="carry-income-cb">📋 نقل الدخل الشهري تلقائياً للشهر الجديد</label>
@@ -170,6 +180,9 @@
         </div>
 
         <div class="save-tag" id="save-tag"></div>
+
+        <!-- Balance summary -->
+        <div id="balance-summary"></div>
 
         <!-- Transfers -->
         <div class="section-divider" style="margin-top:16px">💸 تحويل الكاش والبطاقة</div>
@@ -440,12 +453,12 @@
 
     <div class="transfer-dir-toggle">
       <button class="tr-dir-btn tr-dir-active" id="trd-card2cash" onclick="setTransferDir('card2cash')">
-        💳 بطاقة → 💵 كاش
-        <span>سحب من الصراف</span>
+        <bdi dir="ltr">💳 → 💵</bdi>
+        <span>سحب كاش من البطاقة</span>
       </button>
       <button class="tr-dir-btn" id="trd-cash2card" onclick="setTransferDir('cash2card')">
-        💵 كاش → 💳 بطاقة
-        <span>إيداع في البنك</span>
+        <bdi dir="ltr">💵 → 💳</bdi>
+        <span>إيداع كاش في البطاقة</span>
       </button>
     </div>
 
