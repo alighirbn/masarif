@@ -1226,7 +1226,15 @@ body.dark .mv-item.down { background:rgba(16,185,129,0.15); }
 }
 .qa-top-bar { display:flex; flex-direction:column; align-items:center; position:relative; flex-shrink:0; margin-bottom:12px; }
 .qa-handle { width:40px; height:4px; background:#e2e8f0; border-radius:4px; margin-bottom:8px; }
-.qa-close-x { position:absolute; left:0; top:-4px; background:none; border:none; font-size:18px; color:var(--text2); cursor:pointer; padding:4px 8px; line-height:1; }
+.qa-close-x {
+  position:absolute; right:0; top:-8px;
+  background:#f1f5f9; border:none; border-radius:50%;
+  width:36px; height:36px; font-size:17px; font-weight:700;
+  cursor:pointer; color:#64748b;
+  display:flex; align-items:center; justify-content:center;
+  transition:background 0.15s;
+}
+body.dark .qa-close-x { background:#334155; color:#94a3b8; }
 .qa-title { font-size:17px; font-weight:900; color:var(--dark); margin-bottom:12px; text-align:center; flex-shrink:0; }
 /* Categories — scrollable, takes all available space */
 .qa-cats {
