@@ -937,7 +937,8 @@ function exportAllData(){
     expenses: loadAll(),
     bills: loadBills(),
     notes: getAllNotes(),
-    txns
+    txns,
+    transfers: getAllTransfers()
   };
   const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -1025,6 +1026,7 @@ function importData(event){
             if(k.startsWith('txn_')) localStorage.setItem(k, data.txns[k]);
           }
         }
+        if(data.transfers){ restoreAllTransfers(data.transfers); }
         if(data.currency){
           currentCurrency = data.currency;
           localStorage.setItem('preferred_currency', currentCurrency);
