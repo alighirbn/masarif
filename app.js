@@ -1061,7 +1061,7 @@ async function clearAllData(){
   for(let k in localStorage){
     if(k === 'home_exp' || k === 'category_limits' || k === 'home_cats' ||
        k === 'bills' || k.startsWith('txn_') || k.startsWith('note_') ||
-       k.startsWith('recurring_dismiss_')) {
+       k.startsWith('transfers_') || k.startsWith('recurring_dismiss_')) {
       keysToRemove.push(k);
     }
   }
@@ -2603,7 +2603,7 @@ function wipeLocalAppData(){
     if(k === 'home_exp' || k === 'category_limits' || k === 'home_cats' ||
        k === 'bills' || k === 'local_updated' || k === 'local_synced' ||
        k.startsWith('txn_') || k.startsWith('note_') ||
-       k.startsWith('recurring_dismiss_')){
+       k.startsWith('transfers_') || k.startsWith('recurring_dismiss_')){
       keysToRemove.push(k);
     }
   }
