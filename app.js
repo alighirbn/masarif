@@ -2419,6 +2419,8 @@ let _applyingCloudData = false;
 // ---- Local timestamp helpers ----
 function getLocalUpdated(){ return localStorage.getItem('local_updated') || null; }
 function setLocalUpdated(){ localStorage.setItem('local_updated', new Date().toISOString()); }
+function getLocalSynced(){ return localStorage.getItem('local_synced') || null; }
+function setLocalSynced(ts){ localStorage.setItem('local_synced', ts); }
 
 // ---- Debounced cloud sync (called after every local save) ----
 function scheduleCloudSync(){
@@ -2543,7 +2545,7 @@ function wipeLocalAppData(){
   for(let k in localStorage){
     if(!localStorage.hasOwnProperty(k)) continue;
     if(k === 'home_exp' || k === 'category_limits' || k === 'home_cats' ||
-       k === 'bills' || k === 'local_updated' ||
+       k === 'bills' || k === 'local_updated' || k === 'local_synced' ||
        k.startsWith('txn_') || k.startsWith('note_') ||
        k.startsWith('recurring_dismiss_')){
       keysToRemove.push(k);
@@ -2598,12 +2600,13 @@ async function cloudLogout(){
   showToast('👋 تم تسجيل الخروج');
 }
 
-// Smart merge on login: pick newer version or ask user when conflict exists
+// Smart merge on login: auto-sync when possible, only ask on true conflict
 async function smartMergeOnLogin(){
   try {
     const { data, error } = await db.from('expenses').select('data').eq('user_id', currentUser.id).single();
     if(error && error.code !== 'PGRST116') throw error;
     const localUpdated = getLocalUpdated();
+    const localSynced  = getLocalSynced();
     const cloudData    = data?.data;
     const cloudUpdated = cloudData?.updated || null;
 
@@ -2613,25 +2616,43 @@ async function smartMergeOnLogin(){
       return;
     }
     if(!localUpdated){
-      // No local data → download from cloud
+      // No local data at all → download from cloud silently
       applyCloudData(cloudData);
+      renderEntry(); renderDashboard(); renderSummaryContent();
       return;
     }
-    // Both exist → compare timestamps
-    if(cloudUpdated && cloudUpdated > localUpdated){
-      const useCloud = confirm(
-        '☁️ يوجد بيانات أحدث على السحابة.\n\n' +
-        'السحابة: ' + new Date(cloudUpdated).toLocaleString('ar') + '\n' +
-        'المحلي:  ' + new Date(localUpdated).toLocaleString('ar') + '\n\n' +
-        'موافق = استخدام بيانات السحابة\nإلغاء = الاحتفاظ بالبيانات المحلية'
-      );
-      if(useCloud) applyCloudData(cloudData);
-      else await cloudSync(true);
-    } else if(localUpdated > (cloudUpdated || '')){
+
+    const cloudIsNewer = cloudUpdated && cloudUpdated > localUpdated;
+    const localIsNewer = localUpdated > (cloudUpdated || '');
+    // True conflict: local was modified AFTER last sync AND cloud is also newer
+    const hasUnsyncedLocal = localSynced ? localUpdated > localSynced : false;
+
+    if(cloudIsNewer){
+      if(hasUnsyncedLocal){
+        // Both devices changed data → ask user
+        const useCloud = await customConfirm({
+          icon: '☁️',
+          title: 'تعارض في البيانات',
+          message:
+            'يوجد تغييرات على هذا الجهاز لم تُرفع، وتوجد أيضاً بيانات أحدث على السحابة.\n\n' +
+            'أيّها تريد الاحتفاظ به؟',
+          okText: '☁️ السحابة',
+          cancelText: '📱 هذا الجهاز',
+          danger: false
+        });
+        if(useCloud) { applyCloudData(cloudData); renderEntry(); renderDashboard(); renderSummaryContent(); }
+        else await cloudSync(true);
+      } else {
+        // No local changes since last sync → apply cloud automatically
+        applyCloudData(cloudData);
+        renderEntry(); renderDashboard(); renderSummaryContent();
+        showToast('🔄 تم تحديث البيانات من السحابة');
+      }
+    } else if(localIsNewer){
       // Local is newer → upload silently
       await cloudSync(true);
     }
-    // else: equal timestamps → nothing to do
+    // else: timestamps equal → nothing to do
   } catch(err) {
     console.error('smartMergeOnLogin:', err);
   }
@@ -2648,7 +2669,10 @@ function applyCloudData(d){
     if(d.txns) restoreAllTxns(d.txns);
     if(d.bills) saveBills(d.bills);
     if(d.notes) restoreAllNotes(d.notes);
-    if(d.updated) localStorage.setItem('local_updated', d.updated);
+    if(d.updated){
+      localStorage.setItem('local_updated', d.updated);
+      setLocalSynced(d.updated);
+    }
   } finally {
     _applyingCloudData = false;
   }
@@ -2678,6 +2702,7 @@ async function cloudSync(silent = false){
     if(error) throw error;
     // Keep local timestamp in sync with what we just uploaded
     localStorage.setItem('local_updated', now);
+    setLocalSynced(now);
     clearTimeout(syncRetryTimer);
     badge.textContent = '✅ تمت المزامنة!';
     setTimeout(()=>badge.classList.remove('show'), 2500);
