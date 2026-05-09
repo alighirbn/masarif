@@ -771,13 +771,23 @@ function renderCompare(){
 }
 
 // ==================== CUSTOM CATS ====================
+function syncCatFormState(){
+  CATS.forEach((cat,i)=>{
+    const nameInp = document.getElementById(`ccat-name-${i}`);
+    const emojiBtn = document.querySelector(`#ccat-${i} .emoji-pick`);
+    if(nameInp && nameInp.value.trim()) cat.name = nameInp.value.trim();
+    if(emojiBtn) cat.icon = emojiBtn.textContent.trim();
+  });
+}
+
 function renderCustomCatsList(){
   const container = document.getElementById('custom-cats-list');
   let html = '';
   CATS.forEach((cat,i)=>{
     html += `<div class="custom-cat-row" id="ccat-${i}">
       <button class="emoji-pick" onclick="pickEmoji(${i})" title="اختر رمز">${cat.icon}</button>
-      <input type="text" value="${cat.name}" id="ccat-name-${i}" placeholder="اسم الفئة">
+      <input type="text" value="${cat.name}" id="ccat-name-${i}" placeholder="اسم الفئة"
+        onblur="onCatNameBlur(${i})" onkeydown="if(event.key==='Enter')this.blur()">
       <div style="flex-shrink:0">
         <div class="cat-type-toggle">
           <button class="cat-type-btn ${cat.ess?'active-ess':''}" onclick="setCatType(${i},true)">أساسي</button>
@@ -790,9 +800,27 @@ function renderCustomCatsList(){
   container.innerHTML = html;
 }
 
+function onCatNameBlur(i){
+  const nameInp = document.getElementById(`ccat-name-${i}`);
+  if(!nameInp) return;
+  const val = nameInp.value.trim();
+  if(val && val !== CATS[i].name){
+    CATS[i].name = val;
+    saveCats();
+    renderEntry();
+  }
+}
+
 function setCatType(i, isEss){
+  syncCatFormState();
   CATS[i].ess = isEss;
-  renderCustomCatsList();
+  const row = document.getElementById(`ccat-${i}`);
+  if(row){
+    const btns = row.querySelectorAll('.cat-type-btn');
+    if(btns[0]) btns[0].className = `cat-type-btn ${isEss?'active-ess':''}`;
+    if(btns[1]) btns[1].className = `cat-type-btn ${!isEss?'active-opt':''}`;
+  }
+  saveCats();
 }
 
 async function deleteCat(i){
@@ -813,11 +841,16 @@ async function deleteCat(i){
     danger: true
   });
   if(!ok) return;
+  syncCatFormState();
   CATS.splice(i,1);
+  saveCats();
+  renderEntry();
   renderCustomCatsList();
+  showToast('✓ تم حذف الفئة');
 }
 
 function addCustomCat(){
+  syncCatFormState();
   const newCat = {
     id: 'custom_'+Date.now(),
     name: 'فئة جديدة',
@@ -826,6 +859,8 @@ function addCustomCat(){
     custom: true
   };
   CATS.push(newCat);
+  saveCats();
+  renderEntry();
   renderCustomCatsList();
   setTimeout(()=>{
     const inp = document.getElementById(`ccat-name-${CATS.length-1}`);
@@ -834,12 +869,7 @@ function addCustomCat(){
 }
 
 function saveCustomCats(){
-  CATS.forEach((cat,i)=>{
-    const nameInp = document.getElementById(`ccat-name-${i}`);
-    const emojiBtn = document.querySelector(`#ccat-${i} .emoji-pick`);
-    if(nameInp) cat.name = nameInp.value.trim()||cat.name;
-    if(emojiBtn) cat.icon = emojiBtn.textContent.trim();
-  });
+  syncCatFormState();
   saveCats();
   renderEntry();
   renderCustomCatsList();
@@ -864,7 +894,12 @@ function pickEmoji(catIdx){
   EMOJIS.forEach(e=>{
     const sp = document.createElement('span');
     sp.textContent = e;
-    sp.onclick = () => { btn.textContent = e; closeEmojiPicker(); };
+    sp.onclick = () => {
+      btn.textContent = e;
+      syncCatFormState();
+      saveCats();
+      closeEmojiPicker();
+    };
     picker.appendChild(sp);
   });
   document.body.appendChild(picker);
