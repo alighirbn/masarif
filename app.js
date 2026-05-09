@@ -1804,10 +1804,10 @@ function renderDashboard(){
             <div style="font-size:10px;color:var(--text2);font-weight:700;margin-bottom:2px">💵 كاش</div>
             <div class="dc-val ${cashBal < 0 ? 'red' : 'green'}" style="font-size:15px;line-height:1.1">${fmt(cashBal)}</div>
           </div>
-          ${incCard > 0 ? `<div style="text-align:center">
+          <div style="text-align:center">
             <div style="font-size:10px;color:var(--text2);font-weight:700;margin-bottom:2px">💳 بطاقة</div>
             <div class="dc-val ${cardBal < 0 ? 'red' : 'green'}" style="font-size:15px;line-height:1.1">${fmt(cardBal)}</div>
-          </div>` : ''}
+          </div>
         </div>
         <div class="dc-sub">${lbl}</div>
       ` : '<div class="dc-val">—</div><div class="dc-sub">لا يوجد دخل</div>'}
