@@ -1262,7 +1262,6 @@ function switchTab(t){
   const tabNames = ['dashboard','entry','transfer','compare','statement','settings'];
   document.querySelectorAll('.tab').forEach((el,i)=>{
     el.classList.toggle('active', tabNames[i]===t);
-    if(tabNames[i]===t) el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
   });
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+t).classList.add('active');
