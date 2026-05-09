@@ -25,11 +25,18 @@ const DEFAULT_CATS = [
   {id:'electric',name:'الكهرباء',         icon:'⚡', ess:true,  custom:false},
   {id:'water',   name:'الماء',            icon:'💧', ess:true,  custom:false},
   {id:'repair',  name:'الصيانة والتصليح', icon:'🛠️', ess:true,  custom:false},
-  {id:'furniture',name:'الأجهزة والأثاث',icon:'🛋️', ess:false, custom:false},
-  {id:'fun',     name:'ترفيه العائلة',    icon:'🎡', ess:false, custom:false},
-  {id:'internet',name:'الانترنيت',        icon:'📡', ess:false, custom:false},
-  {id:'mobile',  name:'رصيد الموبايل',   icon:'📱', ess:false, custom:false},
-  {id:'other',   name:'مصاريف متنوعة',   icon:'📦', ess:false, custom:false},
+  {id:'furniture',  name:'الأجهزة والأثاث',   icon:'🛋️', ess:false, custom:false},
+  {id:'fun',        name:'ترفيه العائلة',     icon:'🎡', ess:false, custom:false},
+  {id:'internet',   name:'الانترنيت',         icon:'📡', ess:false, custom:false},
+  {id:'mobile',     name:'رصيد الموبايل',    icon:'📱', ess:false, custom:false},
+  {id:'bread',      name:'خبز وصمون',         icon:'🍞', ess:true,  custom:false},
+  {id:'sweets',     name:'حلويات ومعجنات',   icon:'🍰', ess:false, custom:false},
+  {id:'restaurant', name:'مطاعم',             icon:'🍽️', ess:false, custom:false},
+  {id:'homesup',    name:'مستلزمات المنزل',  icon:'🧹', ess:true,  custom:false},
+  {id:'transport',  name:'أجور النقل',        icon:'🚌', ess:true,  custom:false},
+  {id:'services',   name:'خدمات',             icon:'🔧', ess:false, custom:false},
+  {id:'charity',    name:'تبرع وصدقة',        icon:'🤲', ess:false, custom:false},
+  {id:'other',      name:'مصاريف متنوعة',    icon:'📦', ess:false, custom:false},
 ];
 
 const DEFAULT_LIMITS = {
@@ -59,6 +66,19 @@ function loadCats(){
   const saved = localStorage.getItem('home_cats');
   if(saved){ try{ CATS = JSON.parse(saved); return; }catch(e){} }
   CATS = DEFAULT_CATS.map(c=>({...c}));
+}
+function mergeNewDefaultCats(){
+  const existingIds = new Set(CATS.map(c=>c.id));
+  const otherIdx = CATS.findIndex(c=>c.id==='other');
+  let changed = false;
+  DEFAULT_CATS.forEach(dc=>{
+    if(!existingIds.has(dc.id)){
+      if(otherIdx>=0) CATS.splice(otherIdx,0,{...dc});
+      else CATS.push({...dc});
+      changed = true;
+    }
+  });
+  if(changed) saveCats();
 }
 function saveCats(){
   localStorage.setItem('home_cats', JSON.stringify(CATS));
@@ -3270,6 +3290,7 @@ function initCatDragSort(){
 // ==================== INIT ====================
 function initApp(){
   loadCats();
+  mergeNewDefaultCats();
   loadLimits();
   loadDarkMode();
   initPullToRefresh();
