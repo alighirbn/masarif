@@ -1667,11 +1667,13 @@ function openTxnModal(catId){
 
   renderTxnList();
   document.getElementById('txn-modal').classList.add('active');
-  setTimeout(()=>document.getElementById('txn-amount').focus(), 200);
 }
 
 function closeTxnModal(){
-  document.getElementById('txn-modal').classList.remove('active');
+  const modal = document.getElementById('txn-modal');
+  modal.classList.remove('active');
+  const content = modal.querySelector('.modal-content');
+  if(content) content.style.transform = '';
   txnCatId = null;
   txnEditIdx = null;
 }
@@ -2691,13 +2693,17 @@ document.getElementById('qa-modal')?.addEventListener('click', function(e){
 document.getElementById('qa-amount')?.addEventListener('keydown', function(e){
   if(e.key === 'Enter') doQuickAdd();
 });
-// Lift modal above keyboard on mobile
+// Lift modals above keyboard on mobile
 if(window.visualViewport){
   window.visualViewport.addEventListener('resize', ()=>{
-    const modal = document.getElementById('qa-modal');
-    if(!modal?.classList.contains('active')) return;
-    const offset = window.innerHeight - window.visualViewport.height;
-    document.querySelector('.qa-content').style.transform = `translateY(-${offset}px)`;
+    const offset = Math.max(0, window.innerHeight - window.visualViewport.height);
+    const shift = offset > 0 ? `translateY(-${offset}px)` : '';
+    if(document.getElementById('qa-modal')?.classList.contains('active')){
+      document.querySelector('.qa-content').style.transform = shift;
+    }
+    document.querySelectorAll('.modal.active .modal-content').forEach(el=>{
+      el.style.transform = shift;
+    });
   });
 }
 
