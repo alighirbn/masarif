@@ -308,6 +308,7 @@ function renderEntry(){
   updateHeaderStats();
   updateTabsTop();
   updateStorageInfo();
+  renderTransfers();
 }
 
 // ==================== CAT INPUT (live) ====================
@@ -2814,6 +2815,90 @@ function restoreAllTxns(txns){
 
 // Auto-sync every 3 minutes when logged in
 setInterval(()=>{ if(currentUser) cloudSync(true); }, 3 * 60 * 1000);
+
+// ==================== CASH/CARD TRANSFERS ====================
+function trKey(y, m){ return `transfers_${mKey(y,m)}`; }
+function loadTransfers(y, m){
+  try{ return JSON.parse(localStorage.getItem(trKey(y,m))) || []; }catch(e){ return []; }
+}
+function saveTransfers(y, m, arr){
+  localStorage.setItem(trKey(y,m), JSON.stringify(arr));
+}
+
+let selectedTransferDir = 'card2cash';
+
+function setTransferDir(dir){
+  selectedTransferDir = dir;
+  document.getElementById('trd-card2cash').className = 'tr-dir-btn' + (dir==='card2cash'?' tr-dir-active':'');
+  document.getElementById('trd-cash2card').className = 'tr-dir-btn' + (dir==='cash2card'?' tr-dir-active':'');
+}
+
+function openTransferModal(){
+  selectedTransferDir = 'card2cash';
+  setTransferDir('card2cash');
+  document.getElementById('tr-amount').value = '';
+  document.getElementById('tr-note').value = '';
+  document.getElementById('tr-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('transfer-modal').classList.add('active');
+  setTimeout(()=>document.getElementById('tr-amount').focus(), 150);
+}
+function closeTransferModal(){
+  document.getElementById('transfer-modal').classList.remove('active');
+}
+
+function addTransfer(){
+  const amount = safeCalc(document.getElementById('tr-amount').value);
+  if(!amount || amount <= 0){ showToast('⚠️ أدخل مبلغاً صحيحاً'); return; }
+  const note = document.getElementById('tr-note').value.trim();
+  const date = document.getElementById('tr-date').value;
+  const transfers = loadTransfers(curY, curM);
+  transfers.push({ id: Date.now(), dir: selectedTransferDir, amount, note, date });
+  saveTransfers(curY, curM, transfers);
+  closeTransferModal();
+  renderTransfers();
+  if(!_applyingCloudData){ setLocalUpdated(); scheduleCloudSync(); }
+  const dirLabel = selectedTransferDir === 'card2cash' ? '💳→💵' : '💵→💳';
+  showToast(`✅ تم تسجيل التحويل ${dirLabel} ${fmt(amount)} ${getCurrencyLabel()}`);
+}
+
+async function deleteTransfer(idx){
+  const ok = await customConfirm({
+    icon:'🗑️', title:'حذف التحويل', okText:'حذف', danger:true,
+    message:'هل تريد حذف هذا التحويل؟'
+  });
+  if(!ok) return;
+  const transfers = loadTransfers(curY, curM);
+  transfers.splice(idx, 1);
+  saveTransfers(curY, curM, transfers);
+  renderTransfers();
+}
+
+function renderTransfers(){
+  const container = document.getElementById('transfers-list');
+  if(!container) return;
+  const transfers = loadTransfers(curY, curM);
+  if(!transfers.length){
+    container.innerHTML = '<div class="transfers-empty">لا توجد تحويلات هذا الشهر</div>';
+    return;
+  }
+  const lbl = getCurrencyLabel();
+  container.innerHTML = [...transfers].reverse().map((tr, ri) => {
+    const i = transfers.length - 1 - ri;
+    const isCard2Cash = tr.dir === 'card2cash';
+    const dirLabel = isCard2Cash ? '💳 → 💵' : '💵 → 💳';
+    const dirClass = isCard2Cash ? 'tr-card2cash' : 'tr-cash2card';
+    const dateStr  = tr.date ? formatArabicDate(tr.date) : '';
+    return `<div class="transfer-item ${dirClass}">
+      <div class="tr-icon">${isCard2Cash ? '🏧' : '🏦'}</div>
+      <div class="tr-info">
+        <div class="tr-dir-label">${dirLabel}</div>
+        <div class="tr-meta">${tr.note ? tr.note+' · ' : ''}${dateStr}</div>
+      </div>
+      <div class="tr-amount">${fmt(tr.amount)} ${lbl}</div>
+      <button class="txn-del-btn" onclick="deleteTransfer(${i})" title="حذف">✕</button>
+    </div>`;
+  }).join('');
+}
 
 // ==================== PULL TO REFRESH ====================
 function initPullToRefresh(){

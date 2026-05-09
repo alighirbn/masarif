@@ -171,6 +171,11 @@
 
         <div class="save-tag" id="save-tag"></div>
 
+        <!-- Transfers -->
+        <div class="section-divider" style="margin-top:16px">💸 تحويل الكاش والبطاقة</div>
+        <button class="transfer-add-btn" onclick="openTransferModal()">＋ تسجيل تحويل</button>
+        <div id="transfers-list"></div>
+
         <!-- Monthly note -->
         <div class="section-divider" style="margin-top:16px">📝 ملاحظات الشهر</div>
         <div style="background:var(--card);border-radius:14px;padding:12px;box-shadow:var(--shadow)">
@@ -423,6 +428,47 @@
 
     <div class="modal-actions" style="margin-top:16px">
       <button class="modal-cancel" onclick="closeTxnModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TRANSFER MODAL ===== -->
+<div id="transfer-modal" class="modal">
+  <div class="modal-content" style="max-width:420px">
+    <div class="modal-handle"></div>
+    <h3 style="margin-bottom:14px">💸 تحويل بين الكاش والبطاقة</h3>
+
+    <div class="transfer-dir-toggle">
+      <button class="tr-dir-btn tr-dir-active" id="trd-card2cash" onclick="setTransferDir('card2cash')">
+        💳 بطاقة → 💵 كاش
+        <span>سحب من الصراف</span>
+      </button>
+      <button class="tr-dir-btn" id="trd-cash2card" onclick="setTransferDir('cash2card')">
+        💵 كاش → 💳 بطاقة
+        <span>إيداع في البنك</span>
+      </button>
+    </div>
+
+    <div class="txn-fields" style="margin-top:14px">
+      <div class="txn-field-row">
+        <div class="txn-field">
+          <label>💰 المبلغ</label>
+          <input type="text" id="tr-amount" placeholder="0" inputmode="numeric">
+        </div>
+        <div class="txn-field">
+          <label>📅 التاريخ</label>
+          <input type="date" id="tr-date">
+        </div>
+      </div>
+      <div class="txn-field">
+        <label>📝 ملاحظة (اختياري)</label>
+        <input type="text" id="tr-note" placeholder="مثال: سحب من الصراف الآلي" maxlength="50">
+      </div>
+    </div>
+
+    <button class="txn-add-btn" style="margin-top:14px" onclick="addTransfer()">✅ تسجيل التحويل</button>
+    <div class="modal-actions" style="margin-top:10px">
+      <button class="modal-cancel" onclick="closeTransferModal()">إغلاق</button>
     </div>
   </div>
 </div>
