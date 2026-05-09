@@ -1330,6 +1330,15 @@ function showToast(msg){
 
 // ==================== TRANSACTIONS SYSTEM ====================
 let txnCatId = null; // current open category
+let selectedPayMethod = 'cash';
+
+function setPayMethod(m){
+  selectedPayMethod = m;
+  const cashBtn = document.getElementById('pmb-cash');
+  const cardBtn = document.getElementById('pmb-card');
+  if(cashBtn) cashBtn.className = 'pay-btn' + (m === 'cash' ? ' pay-cash-active' : '');
+  if(cardBtn) cardBtn.className = 'pay-btn' + (m === 'card' ? ' pay-card-active' : '');
+}
 
 // Storage key for transactions: txn_YYYY-MM_catId
 function txnKey(y, m, catId){ return `txn_${mKey(y,m)}_${catId}`; }
@@ -1455,8 +1464,22 @@ function closeTxnModal(){
 function renderTxnList(){
   if(!txnCatId) return;
   const txns = loadTxns(curY, curM, txnCatId);
-  const total = txns.reduce((s,t)=>s+(t.amount||0),0);
+  const total    = txns.reduce((s,t)=>s+(t.amount||0),0);
+  const cashTot  = txns.reduce((s,t)=>t.method!=='card'?s+(t.amount||0):s,0);
+  const cardTot  = txns.reduce((s,t)=>t.method==='card'?s+(t.amount||0):s,0);
+  const lbl      = getCurrencyLabel();
   document.getElementById('txn-modal-total').textContent = fmt(total);
+
+  const summary = document.getElementById('txn-method-summary');
+  if(summary){
+    if(cashTot > 0 && cardTot > 0)
+      summary.innerHTML = `<span class="msum-cash">💵 ${fmt(cashTot)}</span><span class="msum-sep">·</span><span class="msum-card">💳 ${fmt(cardTot)}</span>`;
+    else if(cardTot > 0)
+      summary.innerHTML = `<span class="msum-card">💳 ${fmt(cardTot)} ${lbl}</span>`;
+    else
+      summary.innerHTML = '';
+  }
+
   const badge = document.getElementById('txn-count-badge');
   if(badge) badge.textContent = txns.length ? `${txns.length} عملية` : '';
 
@@ -1475,15 +1498,18 @@ function renderTxnList(){
     list.innerHTML = '<div class="txn-empty">🔍 لا توجد نتائج تطابق البحث</div>';
     return;
   }
-  const lbl = getCurrencyLabel();
   list.innerHTML = [...filtered].reverse().map(t=>{
     const i = txns.indexOf(t);
     const dateDisplay = t.date ? formatArabicDate(t.date) : '';
     const isEditing = txnEditIdx === i;
-    return `<div class="txn-item" style="${isEditing?'border-color:var(--accent);background:#fff0f3':''}">
+    const isCard = t.method === 'card';
+    const methodBadge = isCard
+      ? `<span class="txn-method-badge txn-method-card">💳 بطاقة</span>`
+      : `<span class="txn-method-badge txn-method-cash">💵 كاش</span>`;
+    return `<div class="txn-item${isEditing?' txn-item-editing':''}">
       <div class="txn-item-info">
         <div class="txn-item-desc">${t.desc || '—'}</div>
-        <div class="txn-item-date">📅 ${dateDisplay}</div>
+        <div class="txn-item-meta">${methodBadge}<span class="txn-item-date">📅 ${dateDisplay}</span></div>
       </div>
       <div class="txn-item-amount">${fmt(t.amount)} ${lbl}</div>
       <button class="txn-del-btn" style="background:#dbeafe;color:#1d4ed8;margin-left:4px" onclick="editTransaction(${i})" title="تعديل">✎</button>
@@ -1501,6 +1527,7 @@ function editTransaction(idx){
   document.getElementById('txn-desc').value = t.desc || '';
   document.getElementById('txn-amount').value = t.amount || '';
   if(t.date) document.getElementById('txn-date').value = t.date;
+  setPayMethod(t.method || 'cash');
   document.querySelector('.txn-add-form .form-title').innerHTML = '✏️ تعديل العملية';
   document.querySelector('.txn-add-btn').innerHTML = '💾 حفظ التعديل';
   document.getElementById('txn-amount').focus();
@@ -1511,6 +1538,7 @@ function cancelEditTxn(){
   txnEditIdx = null;
   document.getElementById('txn-desc').value = '';
   document.getElementById('txn-amount').value = '';
+  setPayMethod('cash');
   document.querySelector('.txn-add-form .form-title').innerHTML = '➕ إضافة شراء جديد';
   document.querySelector('.txn-add-btn').innerHTML = '✅ إضافة';
   renderTxnList();
@@ -1534,8 +1562,9 @@ function addTransaction(){
   const date = document.getElementById('txn-date').value;
 
   const txns = loadTxns(curY, curM, txnCatId);
+  const method = selectedPayMethod || 'cash';
   if(txnEditIdx !== null && txns[txnEditIdx]){
-    txns[txnEditIdx] = { ...txns[txnEditIdx], amount, desc, date };
+    txns[txnEditIdx] = { ...txns[txnEditIdx], amount, desc, date, method };
     saveTxns(curY, curM, txnCatId, txns);
     syncTxnTotal(curY, curM, txnCatId);
     doSaveMonth(true);
@@ -1543,7 +1572,7 @@ function addTransaction(){
     showToast(`✅ تم تعديل العملية`);
     return;
   }
-  txns.push({ amount, desc, date, id: Date.now() });
+  txns.push({ amount, desc, date, id: Date.now(), method });
   saveTxns(curY, curM, txnCatId, txns);
   syncTxnTotal(curY, curM, txnCatId);
   markUnsaved();

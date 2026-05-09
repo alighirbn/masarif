@@ -371,12 +371,22 @@
     <div class="modal-handle"></div>
     <div class="txn-modal-header">
       <h3 id="txn-modal-title">📋 تفاصيل المصاريف</h3>
-      <div class="txn-total-badge"><span id="txn-modal-total">0</span> <span id="txn-modal-lbl">د.ع</span></div>
+      <div>
+        <div class="txn-total-badge"><span id="txn-modal-total">0</span> <span id="txn-modal-lbl">د.ع</span></div>
+        <div class="txn-method-summary" id="txn-method-summary"></div>
+      </div>
     </div>
 
     <!-- Add form -->
     <div class="txn-add-form">
       <div class="form-title">➕ إضافة شراء جديد</div>
+
+      <!-- Payment method toggle -->
+      <div class="pay-method-toggle">
+        <button class="pay-btn pay-cash-active" id="pmb-cash" onclick="setPayMethod('cash')">💵 كاش</button>
+        <button class="pay-btn" id="pmb-card" onclick="setPayMethod('card')">💳 بطاقة</button>
+      </div>
+
       <div class="txn-fields">
         <div class="txn-field">
           <label>📝 الوصف (اختياري)</label>

@@ -709,6 +709,43 @@ body.dark .storage-info { background: #0f172a; }
   background: var(--accent); color:#fff; border-radius:20px;
   padding:4px 12px; font-size:14px; font-weight:900;
 }
+/* Pay method toggle */
+.pay-method-toggle {
+  display:flex; gap:8px; margin-bottom:12px;
+}
+.pay-btn {
+  flex:1; padding:10px 8px; border-radius:12px;
+  border:2px solid var(--border); cursor:pointer;
+  font-family:'Cairo',sans-serif; font-size:14px; font-weight:800;
+  background:var(--card); color:var(--text2); transition:all 0.15s;
+}
+.pay-cash-active { background:#dcfce7 !important; border-color:#22c55e !important; color:#15803d !important; }
+.pay-card-active { background:#dbeafe !important; border-color:#3b82f6 !important; color:#1d4ed8 !important; }
+body.dark .pay-btn { background:#1e293b; color:#94a3b8; border-color:#334155; }
+body.dark .pay-cash-active { background:#052e16 !important; border-color:#22c55e !important; color:#4ade80 !important; }
+body.dark .pay-card-active { background:#1e3a5f !important; border-color:#3b82f6 !important; color:#60a5fa !important; }
+
+/* Method summary in modal header */
+.txn-method-summary { font-size:11px; font-weight:700; margin-top:3px; display:flex; gap:6px; justify-content:flex-end; }
+.msum-cash { color:#15803d; }
+.msum-card { color:#1d4ed8; }
+.msum-sep  { color:#94a3b8; }
+body.dark .msum-cash { color:#4ade80; }
+body.dark .msum-card { color:#60a5fa; }
+
+/* Method badge in transaction list */
+.txn-method-badge { font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.txn-method-cash  { background:#dcfce7; color:#15803d; }
+.txn-method-card  { background:#dbeafe; color:#1d4ed8; }
+body.dark .txn-method-cash { background:#052e16; color:#4ade80; }
+body.dark .txn-method-card { background:#1e3a5f; color:#60a5fa; }
+
+.txn-item-meta { display:flex; align-items:center; gap:6px; margin-top:3px; flex-wrap:wrap; }
+.txn-item-date { font-size:11px; color:#94a3b8; font-weight:600; }
+
+.txn-item-editing { border-color:var(--accent) !important; background:#fff0f3 !important; }
+body.dark .txn-item-editing { background:#1a0010 !important; }
+
 .txn-add-form {
   background:#f8fafc; border-radius:16px; padding:14px; margin-bottom:14px;
   border:1.5px dashed #cbd5e1;
@@ -742,8 +779,7 @@ body.dark .txn-field input { background:#1e293b; color:#f1f5f9; border-color:#33
 }
 body.dark .txn-item { background:#0f172a; border-color:#334155; }
 .txn-item-info { flex:1; min-width:0; }
-.txn-item-desc { font-size:13px; font-weight:700; color:var(--dark); margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.txn-item-date { font-size:11px; color:#94a3b8; font-weight:600; }
+.txn-item-desc { font-size:13px; font-weight:700; color:var(--dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .txn-item-amount { font-size:14px; font-weight:900; color:var(--accent); white-space:nowrap; }
 .txn-del-btn {
   width:30px; height:30px; background:#fee2e2; border:none; border-radius:8px;
