@@ -278,19 +278,13 @@ function renderEntry(){
     const txnCount = txns.length;
     const txnCountText = txnCount>0 ? `${txnCount} عملية` : 'اضغط للإضافة';
     const progressBar = limit>0 ? '<div class="limit-progress"><div class="limit-progress-fill" style="width:'+Math.min(percent,100)+'%;background:'+fillColor+'"></div></div>' : '';
-    html += `<div class="cat-row ${rowClass}" onclick="openTxnModal('${c.id}')" style="cursor:pointer">
-      <div class="cat-icon">${c.icon}</div>
-      <div class="cat-info">
-        <div class="cat-name">${c.name}</div>
-        <span class="badge ${c.ess?'b-ess':'b-opt'}">${c.ess?'أساسي':'اختياري'}</span>
-        <div class="limit-info">📊 ${limitText}</div>
-        ${progressBar}
-        <div class="cat-txn-count" id="txncount-${c.id}">${txnCountText}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        <div style="font-size:18px;font-weight:900;color:${v>0?'var(--accent)':'#94a3b8'}">${v>0?fmt(v):'—'}</div>
-        <div style="font-size:11px;color:#94a3b8;font-weight:600">${v>0?getCurrencyLabel():''}</div>
-      </div>
+    html += `<div class="cat-tile ${rowClass}" id="cattile-${c.id}" onclick="openTxnModal('${c.id}')">
+      <div class="ct-cnt${txnCount>0?'':' ct-cnt-hidden'}" id="ct-cnt-${c.id}">${txnCount||''}</div>
+      <div class="ct-icon">${c.icon}</div>
+      <div class="ct-name">${c.name}</div>
+      <div class="ct-amount${v>0?' has-val':''}" id="ct-amount-${c.id}">${v>0?fmt(v):'—'}</div>
+      <div class="ct-bar"><div class="ct-bar-fill" id="ct-bar-${c.id}" style="width:${limit>0?Math.min(percent,100):0}%;background:${fillColor}"></div></div>
+      <span id="txncount-${c.id}" style="display:none"></span>
     </div>`;
   });
   list.innerHTML = html;
@@ -1370,31 +1364,31 @@ function syncTxnTotal(y, m, catId){
   if(!all[key]) all[key] = {};
   all[key][catId] = total;
   saveAll(all);
-  // Update the display in the cat-row
-  const row = document.getElementById('txncount-'+catId)?.closest('.cat-row');
-  if(row){
-    const amountEl = row.querySelector('div[style*="font-size:18px"]');
-    const lblEl = row.querySelector('div[style*="font-size:11px"]');
-    if(amountEl) amountEl.textContent = total>0 ? fmt(total) : '—';
-    if(amountEl) amountEl.style.color = total>0 ? 'var(--accent)' : '#94a3b8';
-    if(lblEl) lblEl.textContent = total>0 ? getCurrencyLabel() : '';
-    // Update limit progress bar
+  // Update the display in the cat-tile
+  const tile = document.getElementById('cattile-'+catId);
+  if(tile){
+    const amountEl = document.getElementById('ct-amount-'+catId);
+    const barFill  = document.getElementById('ct-bar-'+catId);
+    const cntEl    = document.getElementById('ct-cnt-'+catId);
+    if(amountEl){
+      amountEl.textContent = total>0 ? fmt(total) : '—';
+      amountEl.className   = 'ct-amount' + (total>0 ? ' has-val' : '');
+    }
     const limit = getLimitForCategory(catId);
-    const pct = limit>0 ? Math.min((total/limit)*100,100) : 0;
-    const fill = row.querySelector('.limit-progress-fill');
-    if(fill){
-      let color = '#22c55e';
-      if(pct>=100) color='#dc2626'; else if(pct>=85) color='#f59e0b';
-      fill.style.width = pct+'%'; fill.style.background = color;
+    if(barFill){
+      if(limit>0){
+        const pct = Math.min((total/limit)*100,100);
+        let color = '#22c55e';
+        if(pct>=100) color='#dc2626'; else if(pct>=85) color='#f59e0b';
+        barFill.style.width = pct+'%'; barFill.style.background = color;
+      } else { barFill.style.width = '0%'; }
     }
     const rowPct = limit>0?(total/limit)*100:0;
-    row.className = 'cat-row '+(rowPct>=100?'over-limit':rowPct>=85?'near-limit':'');
-    row.style.cursor = 'pointer';
-    // Update count
-    const countEl = row.querySelector('.cat-txn-count');
-    if(countEl){
+    tile.className = 'cat-tile '+(rowPct>=100?'over-limit':rowPct>=85?'near-limit':'');
+    if(cntEl){
       const txns = loadTxns(y,m,catId);
-      countEl.textContent = txns.length>0 ? `${txns.length} عملية` : 'اضغط للإضافة';
+      cntEl.textContent = txns.length>0 ? txns.length : '';
+      cntEl.className   = 'ct-cnt'+(txns.length>0?'':' ct-cnt-hidden');
     }
   }
   updateHeaderStats();
