@@ -714,32 +714,60 @@ body.dark .tr-dir-active { background:#1e3a5f !important; border-color:#3b82f6 !
 .m-pickers{display:flex;gap:10px;margin-bottom:14px}
 .m-pickers select{
   flex:1;padding:12px;border:1.5px solid var(--border);
-  border-radius:14px;font-size:13px;background:#fff;
+  border-radius:14px;font-size:13px;background:var(--card);
   color:var(--dark);font-weight:700;font-family:'Cairo',sans-serif;
+  cursor:pointer;
 }
-.compare-card{
-  background:#fff;border-radius:18px;padding:14px;
-  margin-bottom:10px;box-shadow:var(--shadow);
-}
-.cmp-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.cmp-name{flex:1;font-size:13px;font-weight:800;color:var(--dark)}
-.cmp-diff{font-size:12px;font-weight:800}
-.bar-row{display:flex;gap:8px;align-items:center;margin-bottom:5px}
-.bar-val{font-size:11px;color:#64748b;width:68px;text-align:left;flex-shrink:0;font-weight:700}
-.bar-track{flex:1;height:9px;background:#e2e8f0;border-radius:8px;overflow:hidden}
-.bar-fill{height:100%;border-radius:8px}
-.b1{background:var(--blue)}
-.b2{background:var(--green)}
-.legend{display:flex;gap:14px;font-size:11px;color:#64748b;margin-top:8px}
-.total-compare{
-  background:#fff;border-radius:18px;padding:16px;
-  display:flex;justify-content:space-between;align-items:center;
-  box-shadow:var(--shadow);margin-top:6px;
-}
-.no-data{
-  text-align:center;padding:50px 20px;color:#94a3b8;font-size:14px;
-  background:#fff;border-radius:20px;font-weight:700;
-}
+/* Summary header */
+.cmp-summary{display:flex;align-items:stretch;gap:8px;margin-bottom:12px}
+.cmp-mon-card{flex:1;border-radius:16px;padding:14px 10px;text-align:center;box-shadow:var(--shadow);background:var(--card)}
+.cmp-mon1{border-top:3px solid #3b82f6}
+.cmp-mon2{border-top:3px solid #10b981}
+.cmp-mon-name{font-size:11px;font-weight:800;color:var(--text2);margin-bottom:6px}
+.cmp-mon-total{font-size:17px;font-weight:900;color:var(--dark)}
+.cmp-mon-cur{font-size:10px;color:var(--text2);font-weight:700;margin-bottom:5px}
+.cmp-mon-rem{font-size:10px;font-weight:800}
+.cmp-mon-rem.pos{color:#16a34a}
+.cmp-mon-rem.neg{color:#dc2626}
+body.dark .cmp-mon-rem.pos{color:#4ade80}
+body.dark .cmp-mon-rem.neg{color:#f87171}
+.cmp-vs-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0 4px}
+.cmp-vs-lbl{font-size:22px}
+.cmp-vs-diff{font-size:14px;font-weight:900}
+.cmp-vs-diff.worse{color:#dc2626}
+.cmp-vs-diff.better{color:#16a34a}
+.cmp-vs-diff.same{color:#64748b}
+body.dark .cmp-vs-diff.worse{color:#f87171}
+body.dark .cmp-vs-diff.better{color:#4ade80}
+/* Legend */
+.cmp-legend-row{display:flex;gap:16px;font-size:11px;font-weight:800;color:var(--text2);margin-bottom:12px;padding-right:2px}
+.cmp-dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-left:5px;vertical-align:middle;flex-shrink:0}
+.d1{background:#3b82f6}
+.d2{background:#10b981}
+/* Category cards */
+.cmp-cats{display:flex;flex-direction:column;gap:8px}
+.cmp-cat-card{background:var(--card);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow)}
+.cmp-cat-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cmp-cat-icon{font-size:20px;flex-shrink:0}
+.cmp-cat-name{flex:1;font-size:13px;font-weight:800;color:var(--dark)}
+.cmp-badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:8px;flex-shrink:0}
+.cmp-badge.up{background:#fee2e2;color:#dc2626}
+.cmp-badge.dn{background:#dcfce7;color:#15803d}
+.cmp-badge.same{background:#f1f5f9;color:#64748b}
+body.dark .cmp-badge.up{background:#450a0a;color:#f87171}
+body.dark .cmp-badge.dn{background:#052e16;color:#4ade80}
+body.dark .cmp-badge.same{background:#1e293b;color:#94a3b8}
+.cmp-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.cmp-bar-row:last-child{margin-bottom:0}
+.cmp-bar-track{flex:1;height:10px;background:#e2e8f0;border-radius:8px;overflow:hidden}
+body.dark .cmp-bar-track{background:#334155}
+.cmp-bar-fill{height:100%;border-radius:8px;transition:width .4s ease}
+.f1{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+.f2{background:linear-gradient(90deg,#10b981,#34d399)}
+.cmp-bar-val{font-size:11px;font-weight:800;color:var(--text2);width:72px;text-align:left;flex-shrink:0}
+/* Empty */
+.cmp-empty{text-align:center;padding:50px 20px;color:var(--text2);font-size:14px;font-weight:700;background:var(--card);border-radius:20px;box-shadow:var(--shadow)}
+.no-data{text-align:center;padding:50px 20px;color:#94a3b8;font-size:14px;background:#fff;border-radius:20px;font-weight:700}
 
 /* ===== IMPORT/EXPORT ===== */
 .data-mgmt-box{

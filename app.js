@@ -740,52 +740,89 @@ function renderCompare(){
   const m1 = document.getElementById('m1-sel').value;
   const m2 = document.getElementById('m2-sel').value;
   const out = document.getElementById('compare-content');
-  if(!m1||!m2){ out.innerHTML='<div class="no-data">📅 اختر شهرين للمقارنة</div>'; return; }
+  if(!m1||!m2){
+    out.innerHTML=`<div class="cmp-empty"><div style="font-size:52px;margin-bottom:10px">⚖️</div><div>اختر شهرين لمقارنة مصاريفك</div></div>`;
+    return;
+  }
   const all = loadAll(), d1 = all[m1]||{}, d2 = all[m2]||{};
   const [y1,mo1] = m1.split('-'), [y2,mo2] = m2.split('-');
   const l1 = MONTHS[parseInt(mo1)-1]+' '+y1, l2 = MONTHS[parseInt(mo2)-1]+' '+y2;
   const lbl = getCurrencyLabel();
 
-  let html = '';
-  CATS.forEach(c=>{
-    const v1 = d1[c.id]||0, v2 = d2[c.id]||0;
-    if(!v1&&!v2) return;
-    const mx = Math.max(v1,v2,1);
-    const diff = v2-v1;
-    const dc = diff>0?'#dc2626':diff<0?'#16a34a':'#64748b';
-    const dt = diff===0?'لا تغيير':(diff>0?'+':'')+fmt(diff)+' '+lbl;
-    html += `<div class="compare-card">
-      <div class="cmp-header">
-        <span style="font-size:24px">${c.icon}</span>
-        <span class="cmp-name">${c.name}</span>
-        <span class="cmp-diff" style="color:${dc}">${dt}</span>
-      </div>
-      <div class="bar-row">
-        <div class="bar-val">${fmt(v1)}</div>
-        <div class="bar-track"><div class="bar-fill b1" style="width:${Math.round(v1/mx*100)}%"></div></div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-val">${fmt(v2)}</div>
-        <div class="bar-track"><div class="bar-fill b2" style="width:${Math.round(v2/mx*100)}%"></div></div>
-      </div>
-      <div class="legend">
-        <span><span class="leg-dot" style="background:#3b82f6"></span>${l1}</span>
-        <span><span class="leg-dot" style="background:#10b981"></span>${l2}</span>
-      </div>
-    </div>`;
-  });
-
   const t1 = CATS.reduce((s,c)=>s+(d1[c.id]||0),0);
   const t2 = CATS.reduce((s,c)=>s+(d2[c.id]||0),0);
-  const td = t2-t1;
-  html += `<div class="total-compare">
-    <div>
-      <div style="font-size:14px;font-weight:800;color:var(--dark)">📊 الإجمالي</div>
-      <div style="font-size:12px;color:#64748b;margin-top:4px">${l1}: ${fmt(t1)}</div>
-      <div style="font-size:12px;color:#64748b">${l2}: ${fmt(t2)}</div>
+  const inc1 = d1.income||0, inc2 = d2.income||0;
+  const rem1 = inc1 - t1 - (d1.emergency||0);
+  const rem2 = inc2 - t2 - (d2.emergency||0);
+  const td = t2 - t1;
+  const tdPct = t1>0 ? Math.round(Math.abs(td)/t1*100) : null;
+
+  // ── Summary header ──
+  let html = `
+    <div class="cmp-summary">
+      <div class="cmp-mon-card cmp-mon1">
+        <div class="cmp-mon-name">${l1}</div>
+        <div class="cmp-mon-total">${fmt(t1)}</div>
+        <div class="cmp-mon-cur">${lbl}</div>
+        ${inc1>0?`<div class="cmp-mon-rem ${rem1>=0?'pos':'neg'}">${rem1>=0?'↑':'↓'} ${fmt(Math.abs(rem1))}</div>`:''}
+      </div>
+      <div class="cmp-vs-col">
+        <div class="cmp-vs-lbl">⚖️</div>
+        <div class="cmp-vs-diff ${td>0?'worse':td<0?'better':'same'}">
+          ${td===0?'=':(td>0?'▲':'▼')+(tdPct!==null?tdPct+'%':'')}
+        </div>
+      </div>
+      <div class="cmp-mon-card cmp-mon2">
+        <div class="cmp-mon-name">${l2}</div>
+        <div class="cmp-mon-total">${fmt(t2)}</div>
+        <div class="cmp-mon-cur">${lbl}</div>
+        ${inc2>0?`<div class="cmp-mon-rem ${rem2>=0?'pos':'neg'}">${rem2>=0?'↑':'↓'} ${fmt(Math.abs(rem2))}</div>`:''}
+      </div>
     </div>
-    <div style="font-size:22px;font-weight:900;color:${td>0?'#dc2626':td<0?'#16a34a':'#64748b'}">${td>=0?'+':''}${fmt(td)}</div>
-  </div>`;
+    <div class="cmp-legend-row">
+      <span><span class="cmp-dot d1"></span>${l1}</span>
+      <span><span class="cmp-dot d2"></span>${l2}</span>
+    </div>`;
+
+  // ── Category rows ──
+  const active = CATS.filter(c=>(d1[c.id]||0)>0||(d2[c.id]||0)>0)
+    .sort((a,b)=>Math.max(d2[b.id]||0,d1[b.id]||0)-Math.max(d2[a.id]||0,d1[a.id]||0));
+
+  if(active.length===0){
+    html+=`<div class="cmp-empty">لا توجد بيانات للمقارنة</div>`;
+  } else {
+    html+=`<div class="cmp-cats">`;
+    active.forEach(c=>{
+      const v1=d1[c.id]||0, v2=d2[c.id]||0;
+      const mx=Math.max(v1,v2,1);
+      const diff=v2-v1;
+      const pct=v1>0?Math.round(Math.abs(diff)/v1*100):null;
+      const badge = diff===0
+        ? `<span class="cmp-badge same">= ثابت</span>`
+        : diff>0
+          ? `<span class="cmp-badge up">▲ ${pct!==null?pct+'%':fmt(diff)+' '+lbl}</span>`
+          : `<span class="cmp-badge dn">▼ ${pct!==null?pct+'%':fmt(-diff)+' '+lbl}</span>`;
+      html+=`<div class="cmp-cat-card">
+        <div class="cmp-cat-head">
+          <span class="cmp-cat-icon">${c.icon}</span>
+          <span class="cmp-cat-name">${c.name}</span>
+          ${badge}
+        </div>
+        <div class="cmp-bar-row">
+          <span class="cmp-dot d1"></span>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill f1" style="width:${Math.round(v1/mx*100)}%"></div></div>
+          <span class="cmp-bar-val">${v1>0?fmt(v1):'—'}</span>
+        </div>
+        <div class="cmp-bar-row">
+          <span class="cmp-dot d2"></span>
+          <div class="cmp-bar-track"><div class="cmp-bar-fill f2" style="width:${Math.round(v2/mx*100)}%"></div></div>
+          <span class="cmp-bar-val">${v2>0?fmt(v2):'—'}</span>
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
   out.innerHTML = html;
 }
 
