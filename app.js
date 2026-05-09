@@ -2766,46 +2766,53 @@ function initPullToRefresh(){
   const ptrText   = document.getElementById('ptr-text');
   if(!indicator) return;
 
-  const THRESHOLD = 75;
-  let startY = 0, pulling = false, pulled = false;
+  const THRESHOLD = 80;
+  let startY = 0, pulling = false, pulled = false, active = false;
 
   document.addEventListener('touchstart', e => {
-    if(window.scrollY === 0 && !document.querySelector('.modal.active')){
-      startY  = e.touches[0].clientY;
-      pulling = true;
-      pulled  = false;
-    }
+    if(window.scrollY > 0) return;
+    if(document.querySelector('.modal.active')) return;
+    startY  = e.touches[0].clientY;
+    pulling = true;
+    pulled  = false;
+    active  = false;
   }, { passive: true });
 
   document.addEventListener('touchmove', e => {
     if(!pulling) return;
     const dy = e.touches[0].clientY - startY;
-    if(dy <= 0){ pulling = false; resetPTR(); return; }
-    const h = Math.min(dy * 0.45, THRESHOLD * 0.9);
-    indicator.style.height  = h + 'px';
-    indicator.style.opacity = Math.min(dy / THRESHOLD, 1);
-    pulled = dy >= THRESHOLD;
-    if(pulled){
-      indicator.classList.add('ptr-ready');
-      ptrText.textContent = 'حرر للتحديث ↑';
-    } else {
-      indicator.classList.remove('ptr-ready');
-      ptrText.textContent = 'اسحب للتحديث ↓';
-    }
-  }, { passive: true });
+    if(dy <= 2) return;
 
-  document.addEventListener('touchend', () => {
+    // block native scroll & browser PTR
+    e.preventDefault();
+    active = true;
+
+    const h = Math.min(dy * 0.5, 60);
+    indicator.style.transition = 'none';
+    indicator.style.height     = h + 'px';
+    indicator.style.opacity    = Math.min(dy / THRESHOLD, 1).toFixed(2);
+    pulled = dy >= THRESHOLD;
+    indicator.classList.toggle('ptr-ready', pulled);
+    ptrText.textContent = pulled ? 'حرر للتحديث ↑' : 'اسحب للتحديث ↓';
+  }, { passive: false });
+
+  const onRelease = () => {
     if(!pulling) return;
     pulling = false;
+    if(!active){ pulled = false; return; }
     if(pulled){
+      indicator.style.transition = '';
       indicator.classList.add('ptr-refreshing');
       indicator.classList.remove('ptr-ready');
       ptrText.textContent = 'جاري التحديث...';
-      setTimeout(() => { doRefresh(); resetPTR(); }, 650);
+      setTimeout(() => { doRefresh(); resetPTR(); }, 700);
     } else {
+      indicator.style.transition = 'height 0.2s ease, opacity 0.2s ease';
       resetPTR();
     }
-  });
+  };
+  document.addEventListener('touchend',    onRelease);
+  document.addEventListener('touchcancel', onRelease);
 
   function resetPTR(){
     indicator.style.height  = '0';
@@ -2817,10 +2824,10 @@ function initPullToRefresh(){
   function doRefresh(){
     const sec = document.querySelector('.section.active');
     const tab = sec ? sec.id.replace('tab-', '') : 'entry';
-    if(tab === 'entry')    renderEntry();
+    if(tab === 'entry')     renderEntry();
     if(tab === 'dashboard') renderDashboard();
-    if(tab === 'summary')  renderSummaryContent();
-    if(tab === 'compare')  renderCompare();
+    if(tab === 'summary')   renderSummaryContent();
+    if(tab === 'compare')   renderCompare();
     updateHeaderStats();
     showToast('✓ تم التحديث');
   }

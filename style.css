@@ -322,16 +322,13 @@ body.dark .header { background:#060c18; }
   background: var(--card); border-bottom: 1.5px solid var(--border);
   z-index: 10000; opacity: 0;
   font-size: 13px; font-weight: 700; color: var(--text2);
-  transition: height 0.15s ease, opacity 0.15s ease;
-  will-change: height, opacity;
 }
 #ptr-indicator.ptr-ready { color: var(--accent); }
-#ptr-indicator.ptr-refreshing { height: 54px !important; opacity: 1 !important; }
+#ptr-indicator.ptr-refreshing { height: 52px !important; opacity: 1 !important; transition: none; }
 .ptr-spinner {
-  width: 20px; height: 20px;
+  width: 18px; height: 18px;
   border: 2.5px solid var(--border); border-top-color: var(--accent);
-  border-radius: 50%; flex-shrink: 0;
-  opacity: 0; transition: opacity 0.2s;
+  border-radius: 50%; flex-shrink: 0; opacity: 0;
 }
 #ptr-indicator.ptr-refreshing .ptr-spinner { animation: ptrSpin 0.7s linear infinite; opacity: 1; }
 @keyframes ptrSpin { to { transform: rotate(360deg); } }
