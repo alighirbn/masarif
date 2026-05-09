@@ -785,16 +785,16 @@ function renderCustomCatsList(){
   let html = '';
   CATS.forEach((cat,i)=>{
     html += `<div class="custom-cat-row" id="ccat-${i}">
-      <button class="emoji-pick" onclick="pickEmoji(${i})" title="اختر رمز">${cat.icon}</button>
-      <input type="text" value="${cat.name}" id="ccat-name-${i}" placeholder="اسم الفئة"
-        onblur="onCatNameBlur(${i})" onkeydown="if(event.key==='Enter')this.blur()">
-      <div style="flex-shrink:0">
-        <div class="cat-type-toggle">
-          <button class="cat-type-btn ${cat.ess?'active-ess':''}" onclick="setCatType(${i},true)">أساسي</button>
-          <button class="cat-type-btn ${!cat.ess?'active-opt':''}" onclick="setCatType(${i},false)">اختياري</button>
-        </div>
+      <div class="ccat-top">
+        <button class="emoji-pick" onclick="pickEmoji(${i})" title="اختر رمز">${cat.icon}</button>
+        <input type="text" value="${cat.name}" id="ccat-name-${i}" placeholder="اسم الفئة"
+          onblur="onCatNameBlur(${i})" onkeydown="if(event.key==='Enter')this.blur()">
+        <button class="del-cat-btn" onclick="deleteCat(${i})" title="حذف الفئة">✕</button>
       </div>
-      <button class="del-cat-btn" onclick="deleteCat(${i})">✕</button>
+      <div class="cat-type-toggle">
+        <button class="cat-type-btn ${cat.ess?'active-ess':''}" onclick="setCatType(${i},true)">أساسي</button>
+        <button class="cat-type-btn ${!cat.ess?'active-opt':''}" onclick="setCatType(${i},false)">اختياري</button>
+      </div>
     </div>`;
   });
   container.innerHTML = html;

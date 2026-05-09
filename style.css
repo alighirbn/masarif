@@ -525,22 +525,25 @@ body.dark .carry-income-row label { color: #6ee7b7; }
 
 /* ===== CATS MODAL ===== */
 .custom-cat-row{
-  display:flex;align-items:center;gap:8px;margin-bottom:8px;
+  display:flex;flex-direction:column;gap:8px;margin-bottom:8px;
   padding:10px;background:#f8fafc;border-radius:14px;
 }
+.ccat-top{
+  display:flex;align-items:center;gap:8px;
+}
 .custom-cat-row input[type=text]{
-  flex:1;padding:9px 12px;border:1.5px solid var(--border);
+  flex:1;min-width:0;padding:9px 12px;border:1.5px solid var(--border);
   border-radius:10px;font-size:13px;font-weight:600;font-family:'Cairo',sans-serif;
   background: var(--card); color: var(--dark);
 }
 .custom-cat-row input[type=text]:focus{outline:none;border-color:var(--accent);}
 .emoji-pick{
-  width:44px;height:44px;border:1.5px solid var(--border);
+  width:44px;height:44px;flex-shrink:0;border:1.5px solid var(--border);
   border-radius:10px;font-size:22px;text-align:center;
   background:#fff;cursor:pointer;
 }
 .del-cat-btn{
-  width:36px;height:36px;background:#fee2e2;border:none;
+  width:38px;height:38px;flex-shrink:0;background:#fee2e2;border:none;
   border-radius:10px;color:#dc2626;font-size:18px;cursor:pointer;
 }
 .add-cat-btn{
@@ -550,10 +553,10 @@ body.dark .carry-income-row label { color: #6ee7b7; }
 }
 .add-cat-btn:hover{background:#e8f0fe;border-color:var(--blue);color:var(--blue)}
 .cat-type-toggle{
-  display:flex;gap:6px;margin-top:6px;
+  display:flex;gap:6px;
 }
 .cat-type-btn{
-  flex:1;padding:5px 8px;border-radius:8px;font-size:11px;font-weight:700;
+  flex:1;padding:7px 8px;border-radius:8px;font-size:12px;font-weight:700;
   border:1.5px solid var(--border);cursor:pointer;font-family:'Cairo',sans-serif;
   background:#fff;color:#64748b;transition:all 0.15s;
 }
