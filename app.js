@@ -1086,14 +1086,14 @@ function copyLimitsToMonth(){
 
 // ==================== TABS ====================
 function switchTab(t){
-  const tabNames = ['dashboard','entry','summary','compare','settings'];
+  const tabNames = ['dashboard','entry','transfer','compare','settings'];
   document.querySelectorAll('.tab').forEach((el,i)=>{
     el.classList.toggle('active', tabNames[i]===t);
   });
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+t).classList.add('active');
   if(t==='dashboard'){ renderDashboard(); }
-  if(t==='summary'){ renderSummaryContent(); }
+  if(t==='transfer'){ renderTransferTab(); }
   if(t==='compare'){ populatePickers(); renderCompare(); }
   if(t==='settings'){ renderCustomCatsList(); updateStorageInfo(); }
   // If leaving entry tab with unsaved changes, trigger auto-save
@@ -2954,6 +2954,121 @@ function renderTransfers(){
   }).join('');
 }
 
+// ==================== TRANSFER TAB ====================
+let curYT = now.getFullYear(), curMT = now.getMonth();
+let selectedTransferDirTab = 'card2cash';
+
+function changeMonthT(d){
+  curMT += d;
+  if(curMT < 0){ curMT = 11; curYT--; }
+  if(curMT > 11){ curMT = 0; curYT++; }
+  renderTransferTab();
+}
+
+function setTransferDirTab(dir){
+  selectedTransferDirTab = dir;
+  document.getElementById('ttd-card2cash').className = 'tr-dir-btn' + (dir==='card2cash'?' tr-dir-active':'');
+  document.getElementById('ttd-cash2card').className = 'tr-dir-btn' + (dir==='cash2card'?' tr-dir-active':'');
+}
+
+function renderTransferTab(){
+  document.getElementById('month-label-t').textContent = mLabel(curYT, curMT);
+  renderTransferTabBalance();
+  renderTransferTabList();
+  document.getElementById('tt-amount').value = '';
+  document.getElementById('tt-note').value = '';
+  document.getElementById('tt-date').value = new Date().toISOString().slice(0,10);
+  setTransferDirTab('card2cash');
+}
+
+function renderTransferTabBalance(){
+  const container = document.getElementById('transfer-tab-balance');
+  if(!container) return;
+  const saved    = loadM(curYT, curMT);
+  const income   = saved.income   || 0;
+  const incCard  = saved.incomeCard || 0;
+  const emergency= saved.emergency || 0;
+  const incCash  = income - incCard;
+  if(income === 0){ container.innerHTML = ''; return; }
+  let cashExp = 0, cardExp = 0;
+  CATS.forEach(cat => {
+    loadTxns(curYT, curMT, cat.id).forEach(t => {
+      if(t.method === 'card') cardExp += (t.amount || 0);
+      else                    cashExp += (t.amount || 0);
+    });
+  });
+  const trs    = loadTransfers(curYT, curMT);
+  const c2c    = trs.filter(t=>t.dir==='card2cash').reduce((s,t)=>s+t.amount, 0);
+  const cash2c = trs.filter(t=>t.dir==='cash2card').reduce((s,t)=>s+t.amount, 0);
+  const cashBal = incCash  - cashExp - emergency + c2c - cash2c;
+  const cardBal = incCard  - cardExp - c2c + cash2c;
+  const lbl     = getCurrencyLabel();
+  function balRow(icon, label, val){
+    const neg = val < 0, color = neg ? '#dc2626' : '#15803d', sign = neg ? '−' : '';
+    return `<div class="bsb-row"><span class="bsb-label">${icon} ${label}</span><span class="bsb-val" style="color:${color}">${sign}${fmt(Math.abs(val))} ${lbl}</span></div>`;
+  }
+  container.innerHTML = `<div class="balance-summary-box" style="margin-bottom:12px">
+    <div class="bsb-title">💰 الرصيد المتبقي</div>
+    ${balRow('💵','كاش', cashBal)}
+    ${incCard > 0 ? balRow('💳','بطاقة', cardBal) : ''}
+  </div>`;
+}
+
+function renderTransferTabList(){
+  const container = document.getElementById('transfer-tab-list');
+  if(!container) return;
+  const transfers = loadTransfers(curYT, curMT);
+  if(!transfers.length){
+    container.innerHTML = '<div class="transfers-empty">لا توجد تحويلات هذا الشهر</div>';
+    return;
+  }
+  const lbl = getCurrencyLabel();
+  container.innerHTML = [...transfers].reverse().map((tr, ri) => {
+    const i = transfers.length - 1 - ri;
+    const isCard2Cash = tr.dir === 'card2cash';
+    const dirArrow = `<bdi dir="ltr">${isCard2Cash ? '💳 → 💵' : '💵 → 💳'}</bdi>`;
+    const dirDesc  = isCard2Cash ? 'سحب كاش من البطاقة' : 'إيداع كاش في البطاقة';
+    const dirClass = isCard2Cash ? 'tr-card2cash' : 'tr-cash2card';
+    const dateStr  = tr.date ? formatArabicDate(tr.date) : '';
+    return `<div class="transfer-item ${dirClass}">
+      <div class="tr-icon">${isCard2Cash ? '🏧' : '🏦'}</div>
+      <div class="tr-info">
+        <div class="tr-dir-label">${dirArrow} <span class="tr-dir-desc">${dirDesc}</span></div>
+        <div class="tr-meta">${tr.note ? tr.note+' · ' : ''}${dateStr}</div>
+      </div>
+      <div class="tr-amount">${fmt(tr.amount)} ${lbl}</div>
+      <button class="txn-del-btn" onclick="deleteTransferTab(${i})" title="حذف">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function addTransferTab(){
+  const amount = safeCalc(document.getElementById('tt-amount').value);
+  if(!amount || amount <= 0){ showToast('⚠️ أدخل مبلغاً صحيحاً'); return; }
+  const note = document.getElementById('tt-note').value.trim();
+  const date = document.getElementById('tt-date').value;
+  const transfers = loadTransfers(curYT, curMT);
+  transfers.push({ id: Date.now(), dir: selectedTransferDirTab, amount, note, date });
+  saveTransfers(curYT, curMT, transfers);
+  document.getElementById('tt-amount').value = '';
+  document.getElementById('tt-note').value = '';
+  renderTransferTabList();
+  renderTransferTabBalance();
+  if(!_applyingCloudData){ setLocalUpdated(); scheduleCloudSync(); }
+  const dirLabel = selectedTransferDirTab === 'card2cash' ? '💳→💵' : '💵→💳';
+  showToast(`✅ تم تسجيل التحويل ${dirLabel} ${fmt(amount)} ${getCurrencyLabel()}`);
+}
+
+async function deleteTransferTab(idx){
+  const ok = await customConfirm({ icon:'🗑️', title:'حذف التحويل', okText:'حذف', danger:true, message:'هل تريد حذف هذا التحويل؟' });
+  if(!ok) return;
+  const transfers = loadTransfers(curYT, curMT);
+  transfers.splice(idx, 1);
+  saveTransfers(curYT, curMT, transfers);
+  renderTransferTabList();
+  renderTransferTabBalance();
+}
+
 // ==================== PULL TO REFRESH ====================
 function initPullToRefresh(){
   const indicator = document.getElementById('ptr-indicator');
@@ -3181,13 +3296,13 @@ document.addEventListener('keydown', (e) => {
     const active = document.querySelector('.section.active')?.id;
     if(active === 'tab-entry') tryChangeMonth(-1);
     else if(active === 'tab-dashboard') tryChangeMonthD(-1);
-    else if(active === 'tab-summary') changeMonthS(-1);
+    else if(active === 'tab-transfer') changeMonthT(-1);
   } else if(e.ctrlKey && e.key === 'ArrowRight'){
     e.preventDefault();
     const active = document.querySelector('.section.active')?.id;
     if(active === 'tab-entry') tryChangeMonth(1);
     else if(active === 'tab-dashboard') tryChangeMonthD(1);
-    else if(active === 'tab-summary') changeMonthS(1);
+    else if(active === 'tab-transfer') changeMonthT(1);
   }
 });
 

@@ -79,7 +79,7 @@
   <div class="tabs" id="main-tabs">
     <div class="tab active" onclick="switchTab('dashboard')">🏠 رئيسي</div>
     <div class="tab" onclick="switchTab('entry')">📝 إدخال</div>
-    <div class="tab" onclick="switchTab('summary')">📊 ملخص</div>
+    <div class="tab" onclick="switchTab('transfer')">💸 تحويل</div>
     <div class="tab" onclick="switchTab('compare')">⚖️ مقارنة</div>
     <div class="tab" onclick="switchTab('settings')">⚙️ إعدادات</div>
   </div>
@@ -184,11 +184,6 @@
         <!-- Balance summary -->
         <div id="balance-summary"></div>
 
-        <!-- Transfers -->
-        <div class="section-divider" style="margin-top:16px">💸 تحويل الكاش والبطاقة</div>
-        <button class="transfer-add-btn" onclick="openTransferModal()">＋ تسجيل تحويل</button>
-        <div id="transfers-list"></div>
-
         <!-- Monthly note -->
         <div class="section-divider" style="margin-top:16px">📝 ملاحظات الشهر</div>
         <div style="background:var(--card);border-radius:14px;padding:12px;box-shadow:var(--shadow)">
@@ -214,14 +209,54 @@
     </div>
   </div>
 
-  <!-- ===== SUMMARY TAB ===== -->
-  <div id="tab-summary" class="section">
+  <!-- ===== TRANSFER TAB ===== -->
+  <div id="tab-transfer" class="section">
     <div class="month-bar">
-      <button onclick="changeMonthS(-1)">◀</button>
-      <span class="month-label" id="month-label-s"></span>
-      <button onclick="changeMonthS(1)">▶</button>
+      <button onclick="changeMonthT(-1)">◀</button>
+      <span class="month-label" id="month-label-t"></span>
+      <button onclick="changeMonthT(1)">▶</button>
     </div>
-    <div id="summary-content"></div>
+
+    <!-- Balance display -->
+    <div id="transfer-tab-balance"></div>
+
+    <!-- Inline add form -->
+    <div style="background:var(--card);border-radius:18px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px">
+      <div class="form-title">➕ تسجيل تحويل جديد</div>
+      <div class="transfer-dir-toggle">
+        <button class="tr-dir-btn tr-dir-active" id="ttd-card2cash" onclick="setTransferDirTab('card2cash')">
+          <bdi dir="ltr">💳 → 💵</bdi>
+          <span>سحب كاش من البطاقة</span>
+        </button>
+        <button class="tr-dir-btn" id="ttd-cash2card" onclick="setTransferDirTab('cash2card')">
+          <bdi dir="ltr">💵 → 💳</bdi>
+          <span>إيداع كاش في البطاقة</span>
+        </button>
+      </div>
+      <div class="txn-fields" style="margin-top:14px">
+        <div class="txn-field-row">
+          <div class="txn-field">
+            <label>💰 المبلغ</label>
+            <input type="text" id="tt-amount" placeholder="0" inputmode="numeric">
+          </div>
+          <div class="txn-field">
+            <label>📅 التاريخ</label>
+            <input type="date" id="tt-date">
+          </div>
+        </div>
+        <div class="txn-field">
+          <label>📝 ملاحظة (اختياري)</label>
+          <input type="text" id="tt-note" placeholder="مثال: سحب من الصراف الآلي" maxlength="50">
+        </div>
+      </div>
+      <button class="txn-add-btn" style="margin-top:14px" onclick="addTransferTab()">✅ تسجيل التحويل</button>
+    </div>
+
+    <!-- Transfers list -->
+    <div style="background:var(--card);border-radius:18px;padding:16px;box-shadow:var(--shadow)">
+      <div class="txn-list-title">📌 تحويلات الشهر</div>
+      <div id="transfer-tab-list" class="txn-list"></div>
+    </div>
   </div>
 
   <!-- ===== COMPARE TAB ===== -->
