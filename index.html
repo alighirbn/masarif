@@ -606,7 +606,10 @@
 <!-- ===== QUICK ADD MODAL ===== -->
 <div id="qa-modal" class="qa-modal">
   <div class="qa-content">
-    <div class="qa-handle"></div>
+    <div class="qa-top-bar">
+      <div class="qa-handle"></div>
+      <button class="qa-close-x" onclick="closeQuickAdd()">✕</button>
+    </div>
     <div class="qa-title">⚡ إضافة سريعة</div>
     <div class="qa-cats" id="qa-cats"></div>
     <div class="qa-bottom">
@@ -617,10 +620,7 @@
       <div class="qa-amount-row">
         <input type="text" id="qa-amount" class="qa-amount-inp" placeholder="0" inputmode="numeric" autocomplete="off">
         <span id="qa-currency-lbl" class="qa-cur-lbl">د.ع</span>
-      </div>
-      <div class="qa-actions">
-        <button class="qa-cancel" onclick="closeQuickAdd()">إلغاء</button>
-        <button class="qa-add-btn" onclick="doQuickAdd()">✅ إضافة</button>
+        <button class="qa-add-btn" onclick="doQuickAdd()">✅</button>
       </div>
     </div>
   </div>
