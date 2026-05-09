@@ -1673,7 +1673,7 @@ function closeTxnModal(){
   const modal = document.getElementById('txn-modal');
   modal.classList.remove('active');
   const content = modal.querySelector('.modal-content');
-  if(content) content.style.transform = '';
+  if(content) content.style.maxHeight = '';
   txnCatId = null;
   txnEditIdx = null;
 }
@@ -2693,16 +2693,28 @@ document.getElementById('qa-modal')?.addEventListener('click', function(e){
 document.getElementById('qa-amount')?.addEventListener('keydown', function(e){
   if(e.key === 'Enter') doQuickAdd();
 });
-// Lift modals above keyboard on mobile
+// Handle keyboard appearance on mobile
 if(window.visualViewport){
   window.visualViewport.addEventListener('resize', ()=>{
-    const offset = Math.max(0, window.innerHeight - window.visualViewport.height);
-    const shift = offset > 0 ? `translateY(-${offset}px)` : '';
+    const vvHeight = window.visualViewport.height;
+    const offset   = Math.max(0, window.innerHeight - vvHeight);
+
+    // Quick Add (bottom sheet) — translate the whole panel up
     if(document.getElementById('qa-modal')?.classList.contains('active')){
-      document.querySelector('.qa-content').style.transform = shift;
+      document.querySelector('.qa-content').style.transform =
+        offset > 0 ? `translateY(-${offset}px)` : '';
     }
+
+    // Transaction / other modals — shrink max-height to fit above keyboard
     document.querySelectorAll('.modal.active .modal-content').forEach(el=>{
-      el.style.transform = shift;
+      el.style.maxHeight = offset > 0 ? vvHeight + 'px' : '';
+      if(offset > 0){
+        setTimeout(()=>{
+          const focused = document.activeElement;
+          if(focused && el.contains(focused))
+            focused.scrollIntoView({behavior:'smooth', block:'center'});
+        }, 80);
+      }
     });
   });
 }
