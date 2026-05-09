@@ -580,7 +580,7 @@ function updateStorageInfo(){
 
 // ==================== SUMMARY ====================
 function renderSummaryContent(){
-  document.getElementById('month-label-s').textContent = mLabel(curYS,curMS);
+  if(!document.getElementById('month-label-s')) return;
   const s = loadM(curYS,curMS);
   const total = CATS.reduce((a,c)=>a+(s[c.id]||0),0);
   const ess   = CATS.filter(c=>c.ess).reduce((a,c)=>a+(s[c.id]||0),0);
@@ -3135,7 +3135,7 @@ function initPullToRefresh(){
     const tab = sec ? sec.id.replace('tab-', '') : 'entry';
     if(tab === 'entry')     renderEntry();
     if(tab === 'dashboard') renderDashboard();
-    if(tab === 'summary')   renderSummaryContent();
+    if(tab === 'transfer')  renderTransferTab();
     if(tab === 'compare')   renderCompare();
     updateHeaderStats();
     showToast('✓ تم التحديث');
