@@ -339,10 +339,14 @@ body.dark .header { background:#060c18; }
   display:flex;background:#fff;
   border-bottom:1px solid var(--border);
   box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  overflow-x:auto;overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
 }
+.tabs::-webkit-scrollbar{display:none;}
 .tab{
-  flex:1;padding:13px 4px;text-align:center;font-size:13px;
-  cursor:pointer;border-bottom:3px solid transparent;
+  flex:0 0 auto;padding:13px 14px;text-align:center;font-size:13px;
+  cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;
   color:#64748b;font-weight:700;transition:all .2s;
 }
 .tab.active{color:var(--dark);border-bottom-color:var(--accent);background:#fafbfc;}
