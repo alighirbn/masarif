@@ -2709,11 +2709,9 @@ if(window.visualViewport){
     document.querySelectorAll('.modal.active .modal-content').forEach(el=>{
       el.style.maxHeight = offset > 0 ? vvHeight + 'px' : '';
       if(offset > 0){
-        setTimeout(()=>{
-          const focused = document.activeElement;
-          if(focused && el.contains(focused))
-            focused.scrollIntoView({behavior:'smooth', block:'center'});
-        }, 80);
+        const focused = document.activeElement;
+        if(focused && el.contains(focused))
+          focused.scrollIntoView({behavior:'instant', block:'center'});
       }
     });
   });
