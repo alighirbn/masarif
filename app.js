@@ -2097,13 +2097,9 @@ function addTransaction(){
   syncTxnTotal(curY, curM, txnCatId);
   markUnsaved();
   doSaveMonth(true);
-
-  document.getElementById('txn-amount').value = '';
-  document.getElementById('txn-desc').value = '';
-
-  renderTxnList();
   renderEntry();
   showToast(`✅ تمت إضافة ${fmt(amount)} ${getCurrencyLabel()}`);
+  closeTxnModal();
 }
 
 async function deleteTransaction(idx){
