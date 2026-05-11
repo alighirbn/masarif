@@ -15,28 +15,50 @@ let currentCurrency = 'IQD';
 function getCurrencyLabel() { return CURRENCIES[currentCurrency]?.label || 'د.ع'; }
 
 const DEFAULT_CATS = [
-  {id:'meat',    name:'اللحوم',           icon:'🥩', ess:true,  custom:false},
-  {id:'chicken', name:'الدجاج',           icon:'🍗', ess:true,  custom:false},
-  {id:'gas',     name:'الغاز',            icon:'🔥', ess:true,  custom:false},
-  {id:'fuel',    name:'الوقود',           icon:'⛽', ess:true,  custom:false},
-  {id:'school',  name:'الأقساط الدراسية', icon:'🎓', ess:true,  custom:false},
-  {id:'veg',     name:'الخضار والفواكه',  icon:'🥦', ess:true,  custom:false},
-  {id:'grocery', name:'الغذائية',         icon:'🛒', ess:true,  custom:false},
-  {id:'electric',name:'الكهرباء',         icon:'⚡', ess:true,  custom:false},
-  {id:'water',   name:'الماء',            icon:'💧', ess:true,  custom:false},
-  {id:'repair',  name:'الصيانة والتصليح', icon:'🛠️', ess:true,  custom:false},
-  {id:'furniture',  name:'الأجهزة والأثاث',   icon:'🛋️', ess:false, custom:false},
-  {id:'fun',        name:'ترفيه العائلة',     icon:'🎡', ess:false, custom:false},
-  {id:'internet',   name:'الانترنيت',         icon:'📡', ess:false, custom:false},
-  {id:'mobile',     name:'رصيد الموبايل',    icon:'📱', ess:false, custom:false},
-  {id:'bread',      name:'خبز وصمون',         icon:'🍞', ess:true,  custom:false},
-  {id:'sweets',     name:'حلويات ومعجنات',   icon:'🍰', ess:false, custom:false},
-  {id:'restaurant', name:'مطاعم',             icon:'🍽️', ess:false, custom:false},
-  {id:'homesup',    name:'مستلزمات المنزل',  icon:'🧹', ess:true,  custom:false},
-  {id:'transport',  name:'أجور النقل',        icon:'🚌', ess:true,  custom:false},
-  {id:'services',   name:'خدمات',             icon:'🔧', ess:false, custom:false},
-  {id:'charity',    name:'تبرع وصدقة',        icon:'🤲', ess:false, custom:false},
-  {id:'other',      name:'مصاريف متنوعة',    icon:'📦', ess:false, custom:false},
+  // الغذاء
+  {id:'bread',      name:'خبز وصمون',              icon:'🍞', ess:true,  custom:false},
+  {id:'meat',       name:'اللحوم',                 icon:'🥩', ess:true,  custom:false},
+  {id:'chicken',    name:'الدجاج',                 icon:'🍗', ess:true,  custom:false},
+  {id:'veg',        name:'الخضار والفواكه',         icon:'🥦', ess:true,  custom:false},
+  {id:'grocery',    name:'الغذائية',               icon:'🛒', ess:true,  custom:false},
+  {id:'sweets',     name:'حلويات ومعجنات',         icon:'🍰', ess:false, custom:false},
+  {id:'restaurant', name:'مطاعم',                  icon:'🍽️', ess:false, custom:false},
+  // المنزل والخدمات
+  {id:'electric',   name:'الكهرباء',               icon:'⚡', ess:true,  custom:false},
+  {id:'water',      name:'الماء',                  icon:'💧', ess:true,  custom:false},
+  {id:'gas',        name:'الغاز',                  icon:'🔥', ess:true,  custom:false},
+  {id:'internet',   name:'الانترنيت',              icon:'📡', ess:false, custom:false},
+  {id:'satellite',  name:'اشتراك ستلايت',          icon:'📺', ess:false, custom:false},
+  {id:'homesup',    name:'مستلزمات المنزل',        icon:'🧹', ess:true,  custom:false},
+  {id:'repair',     name:'الصيانة والتصليح',       icon:'🛠️', ess:true,  custom:false},
+  {id:'furniture',  name:'الأجهزة والأثاث',        icon:'🛋️', ess:false, custom:false},
+  // التعليم
+  {id:'school',     name:'الأقساط الدراسية',       icon:'🎓', ess:true,  custom:false},
+  {id:'stationery', name:'قرطاسية ولوازم مدرسية', icon:'✏️', ess:false, custom:false},
+  // الصحة
+  {id:'health',     name:'صحة ودواء',              icon:'💊', ess:true,  custom:false},
+  {id:'doctor',     name:'مراجعات ومستشفيات',      icon:'🏥', ess:false, custom:false},
+  // التنقل
+  {id:'fuel',       name:'الوقود',                 icon:'⛽', ess:true,  custom:false},
+  {id:'transport',  name:'أجور النقل',             icon:'🚌', ess:true,  custom:false},
+  {id:'carservice', name:'صيانة السيارة',          icon:'🚗', ess:false, custom:false},
+  // الاتصالات
+  {id:'mobile',     name:'رصيد الموبايل',          icon:'📱', ess:false, custom:false},
+  // الملابس والمظهر
+  {id:'clothing',   name:'ملابس وأحذية وعطور',    icon:'👗', ess:false, custom:false},
+  {id:'haircut',    name:'حلاقة وتجميل',           icon:'💇', ess:false, custom:false},
+  // الترفيه والسفر
+  {id:'fun',        name:'ترفيه العائلة',          icon:'🎡', ess:false, custom:false},
+  {id:'travel',     name:'سفر وتنزه',              icon:'✈️', ess:false, custom:false},
+  // المالية
+  {id:'debt',       name:'أقساط وديون',            icon:'💳', ess:false, custom:false},
+  {id:'loan',       name:'تسديد قرض',              icon:'🏦', ess:false, custom:false},
+  // الاجتماعية
+  {id:'gifts',      name:'هدايا ومناسبات',         icon:'🎁', ess:false, custom:false},
+  {id:'charity',    name:'تبرع وصدقة',             icon:'🤲', ess:false, custom:false},
+  // متنوع
+  {id:'services',   name:'خدمات',                  icon:'🔧', ess:false, custom:false},
+  {id:'other',      name:'مصاريف متنوعة',          icon:'📦', ess:false, custom:false},
 ];
 
 const DEFAULT_LIMITS = {
@@ -80,6 +102,14 @@ function mergeNewDefaultCats(){
     }
   });
   if(changed) saveCats();
+}
+function applyDefaultOrder(){
+  if(localStorage.getItem('home_cats_user_ordered') === 'true') return;
+  const defaultOrder = DEFAULT_CATS.map(dc=>dc.id);
+  const custom = CATS.filter(c=>!defaultOrder.includes(c.id));
+  const sorted = defaultOrder.map(id=>CATS.find(c=>c.id===id)).filter(Boolean).concat(custom);
+  const changed = sorted.some((c,i)=>c.id !== CATS[i]?.id);
+  if(changed){ CATS = sorted; saveCats(); }
 }
 function saveCats(){
   localStorage.setItem('home_cats', JSON.stringify(CATS));
@@ -1521,6 +1551,80 @@ function updateWhatIf(){
   `;
 }
 
+// ==================== GLOBAL SEARCH ====================
+function openGlobalSearch(){
+  const sel = document.getElementById('gs-cat');
+  sel.innerHTML = '<option value="">كل الفئات</option>' +
+    CATS.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+  document.getElementById('gs-query').value = '';
+  document.getElementById('gs-results').innerHTML = '<div class="txn-empty">اكتب كلمة للبحث…</div>';
+  document.getElementById('global-search-modal').classList.add('active');
+  setTimeout(()=>document.getElementById('gs-query').focus(), 100);
+}
+function closeGlobalSearch(){
+  document.getElementById('global-search-modal').classList.remove('active');
+}
+let _gsTimer = null;
+function runGlobalSearch(){
+  clearTimeout(_gsTimer);
+  _gsTimer = setTimeout(_doGlobalSearch, 220);
+}
+function _doGlobalSearch(){
+  const q = document.getElementById('gs-query').value.trim().toLowerCase();
+  const catFilter = document.getElementById('gs-cat').value;
+  const resultsEl = document.getElementById('gs-results');
+  if(!q && !catFilter){
+    resultsEl.innerHTML = '<div class="txn-empty">اكتب كلمة للبحث…</div>';
+    return;
+  }
+  const lbl = getCurrencyLabel();
+  const catMap = new Map(CATS.map(c=>[c.id, c]));
+  const results = [];
+  for(const key in localStorage){
+    if(!key.startsWith('txn_')) continue;
+    try{
+      const parts = key.replace('txn_','').split('_');
+      if(parts.length < 3) continue;
+      const catId = parts.slice(0,-2).join('_');
+      const y = parseInt(parts[parts.length-2]);
+      const m = parseInt(parts[parts.length-1]) - 1;
+      if(catFilter && catId !== catFilter) continue;
+      const txns = JSON.parse(localStorage.getItem(key) || '[]');
+      for(const t of txns){
+        const descMatch = !q || (t.desc||'').toLowerCase().includes(q);
+        const amountMatch = !q || String(t.amount||'').includes(q);
+        if(descMatch || amountMatch) results.push({ catId, y, m, t });
+      }
+    }catch(e){}
+  }
+  if(!results.length){
+    resultsEl.innerHTML = '<div class="txn-empty">🔍 لا توجد نتائج</div>';
+    return;
+  }
+  results.sort((a,b)=>{
+    const da = a.t.date || `${a.y}-${String(a.m+1).padStart(2,'0')}`;
+    const db = b.t.date || `${b.y}-${String(b.m+1).padStart(2,'0')}`;
+    return db.localeCompare(da);
+  });
+  const MAX = 80;
+  const shown = results.slice(0, MAX);
+  const header = results.length > MAX
+    ? `<div style="font-size:12px;color:#94a3b8;font-weight:700;padding:4px 0 8px">أول ${MAX} نتيجة من ${results.length}</div>`
+    : `<div style="font-size:12px;color:#94a3b8;font-weight:700;padding:4px 0 8px">${results.length} نتيجة</div>`;
+  resultsEl.innerHTML = header + shown.map(({catId,y,m,t})=>{
+    const cat = catMap.get(catId);
+    const dateLabel = t.date ? formatArabicDate(t.date) : MONTHS[m] + ' ' + y;
+    return `<div class="txn-item">
+      <span style="font-size:20px">${cat?.icon||'💰'}</span>
+      <div class="txn-item-info" style="flex:1">
+        <div class="txn-item-desc">${t.desc||'بدون وصف'}</div>
+        <div class="txn-item-date">${cat?.name||catId} • ${dateLabel}</div>
+      </div>
+      <span style="font-weight:800;color:var(--accent);font-size:14px;white-space:nowrap">${fmt(t.amount)} ${lbl}</span>
+    </div>`;
+  }).join('');
+}
+
 // ==================== UPCOMING BILLS ====================
 // Stored under 'bills' key in localStorage
 function loadBills(){
@@ -1580,11 +1684,20 @@ function openBillsModal(){
   document.getElementById('bill-name').value = '';
   document.getElementById('bill-day').value = '';
   document.getElementById('bill-amount').value = '';
+  document.getElementById('bill-is-loan').checked = false;
+  document.getElementById('bill-loan-fields').style.display = 'none';
+  document.getElementById('bill-loan-type').value = 'loan';
+  document.getElementById('bill-total').value = '';
+  document.getElementById('bill-start-date').value = '';
   renderBillsList();
   document.getElementById('bills-modal').classList.add('active');
 }
 function closeBillsModal(){
   document.getElementById('bills-modal').classList.remove('active');
+}
+function toggleLoanFields(){
+  const isLoan = document.getElementById('bill-is-loan').checked;
+  document.getElementById('bill-loan-fields').style.display = isLoan ? 'block' : 'none';
 }
 function submitNewBill(){
   const name = document.getElementById('bill-name').value.trim();
@@ -1593,13 +1706,54 @@ function submitNewBill(){
   const amount = safeCalc(document.getElementById('bill-amount').value) || 0;
   if(!name){ showToast('⚠️ أدخل اسم الفاتورة'); return; }
   if(!dueDay || dueDay < 1 || dueDay > 31){ showToast('⚠️ يوم الاستحقاق بين 1 و 31'); return; }
-  addBill({ name, catId, dueDay, amount });
+  const isLoan = document.getElementById('bill-is-loan').checked;
+  const bill = { name, catId, dueDay, amount };
+  if(isLoan){
+    const totalAmount = safeCalc(document.getElementById('bill-total').value) || 0;
+    const startDate = document.getElementById('bill-start-date').value;
+    const loanType = document.getElementById('bill-loan-type').value;
+    if(!totalAmount){ showToast('⚠️ أدخل المبلغ الإجمالي'); return; }
+    if(!startDate){ showToast('⚠️ أدخل تاريخ بدء التسديد'); return; }
+    if(!amount){ showToast('⚠️ أدخل المبلغ الشهري'); return; }
+    bill.isLoan = true;
+    bill.loanType = loanType;
+    bill.totalAmount = totalAmount;
+    bill.startDate = startDate;
+  }
+  addBill(bill);
   document.getElementById('bill-name').value = '';
   document.getElementById('bill-day').value = '';
   document.getElementById('bill-amount').value = '';
+  document.getElementById('bill-is-loan').checked = false;
+  document.getElementById('bill-loan-fields').style.display = 'none';
+  document.getElementById('bill-total').value = '';
+  document.getElementById('bill-start-date').value = '';
   renderBillsList();
   showToast('✅ تمت إضافة الفاتورة');
   renderDashboard();
+}
+function loanProgress(b){
+  if(!b.isLoan || !b.totalAmount || !b.amount || !b.startDate) return '';
+  const [sy, sm] = b.startDate.split('-').map(Number);
+  const now = new Date();
+  const monthsPaid = (now.getFullYear() - sy) * 12 + (now.getMonth() + 1 - sm);
+  const paid = Math.min(monthsPaid * b.amount, b.totalAmount);
+  const remaining = Math.max(b.totalAmount - paid, 0);
+  const monthsLeft = remaining > 0 ? Math.ceil(remaining / b.amount) : 0;
+  const pct = Math.min(Math.round((paid / b.totalAmount) * 100), 100);
+  const endDate = new Date(now.getFullYear(), now.getMonth() + monthsLeft, 1);
+  const endLabel = monthsLeft > 0
+    ? MONTHS[endDate.getMonth()] + ' ' + endDate.getFullYear()
+    : 'منتهي ✅';
+  const lbl = getCurrencyLabel();
+  return `<div class="loan-progress">
+    <div class="loan-progress-bar"><div class="loan-progress-fill" style="width:${pct}%"></div></div>
+    <div class="loan-progress-info">
+      <span>المدفوع: ${fmt(paid)} ${lbl}</span>
+      <span>المتبقي: ${fmt(remaining)} ${lbl}</span>
+    </div>
+    <div class="loan-progress-end">⏳ ${monthsLeft} شهر متبقي • ينتهي: ${endLabel}</div>
+  </div>`;
 }
 function renderBillsList(){
   const bills = loadBills();
@@ -1611,13 +1765,16 @@ function renderBillsList(){
   const lbl = getCurrencyLabel();
   list.innerHTML = bills.map(b => {
     const cat = CATS.find(c => c.id === b.catId);
-    return `<div class="txn-item">
-      <span style="font-size:22px">${cat?.icon || '💰'}</span>
-      <div class="txn-item-info">
-        <div class="txn-item-desc">${b.name}</div>
-        <div class="txn-item-date">يوم ${b.dueDay} • ${cat?.name || ''} • ${b.amount ? fmt(b.amount) + ' ' + lbl : 'بدون مبلغ'}</div>
+    return `<div class="txn-item" style="flex-direction:column;align-items:stretch;gap:6px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">${b.isLoan ? (b.loanType === 'installment' ? '🛒' : '🏦') : (cat?.icon || '💰')}</span>
+        <div class="txn-item-info" style="flex:1">
+          <div class="txn-item-desc">${b.name}${b.isLoan ? ` <span style="font-size:11px;background:#dbeafe;color:#1d4ed8;padding:2px 6px;border-radius:6px;font-weight:700">${b.loanType === 'installment' ? 'أقساط' : 'قرض'}</span>` : ''}</div>
+          <div class="txn-item-date">يوم ${b.dueDay} • ${cat?.name || ''} • ${b.amount ? fmt(b.amount) + ' ' + lbl + '/شهر' : 'بدون مبلغ'}${b.isLoan ? ' • إجمالي: ' + fmt(b.totalAmount) + ' ' + lbl : ''}</div>
+        </div>
+        <button class="txn-del-btn" onclick="confirmDeleteBill(${b.id})" title="حذف">✕</button>
       </div>
-      <button class="txn-del-btn" onclick="confirmDeleteBill(${b.id})" title="حذف">✕</button>
+      ${loanProgress(b)}
     </div>`;
   }).join('');
 }
@@ -3666,6 +3823,7 @@ function initCatDragSort(){
     if(overIdx >= 0 && overIdx !== dragIdx){
       const [moved] = CATS.splice(dragIdx, 1);
       CATS.splice(overIdx, 0, moved);
+      localStorage.setItem('home_cats_user_ordered', 'true');
       saveCats();
       renderEntry();
       renderCustomCatsList();
@@ -3684,6 +3842,7 @@ function initCatDragSort(){
 function initApp(){
   loadCats();
   mergeNewDefaultCats();
+  applyDefaultOrder();
   loadLimits();
   loadDarkMode();
   initPullToRefresh();
