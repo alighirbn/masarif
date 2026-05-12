@@ -1614,7 +1614,8 @@ function _doGlobalSearch(){
   resultsEl.innerHTML = header + shown.map(({catId,y,m,t})=>{
     const cat = catMap.get(catId);
     const dateLabel = t.date ? formatArabicDate(t.date) : MONTHS[m] + ' ' + y;
-    return `<div class="txn-item">
+    const safeId = catId.replace(/'/g,"\\'");
+    return `<div class="txn-item" style="cursor:pointer" onclick="goToTxn(${y},${m},'${safeId}',${t.id||'null'})">
       <span style="font-size:20px">${cat?.icon||'💰'}</span>
       <div class="txn-item-info" style="flex:1">
         <div class="txn-item-desc">${t.desc||'بدون وصف'}</div>
@@ -1623,6 +1624,30 @@ function _doGlobalSearch(){
       <span style="font-weight:800;color:var(--accent);font-size:14px;white-space:nowrap">${fmt(t.amount)} ${lbl}</span>
     </div>`;
   }).join('');
+}
+
+function goToTxn(y, m, catId, txnId){
+  closeGlobalSearch();
+  curY = y; curM = m;
+  renderEntry();
+  openTxnModal(catId);
+  if(txnId){
+    const txns = loadTxns(y, m, catId);
+    const idx = txns.findIndex(t => t.id === txnId);
+    if(idx !== -1){
+      setTimeout(()=>{
+        const items = document.querySelectorAll('#txn-list .txn-item');
+        const reversed = txns.length - 1 - idx;
+        const el = items[reversed];
+        if(el){
+          el.scrollIntoView({behavior:'smooth', block:'center'});
+          el.style.transition = 'background 0.3s';
+          el.style.background = 'var(--accent-light, #dbeafe)';
+          setTimeout(()=>{ el.style.background = ''; }, 1500);
+        }
+      }, 150);
+    }
+  }
 }
 
 // ==================== UPCOMING BILLS ====================
