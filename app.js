@@ -1583,11 +1583,11 @@ function _doGlobalSearch(){
   for(const key in localStorage){
     if(!key.startsWith('txn_')) continue;
     try{
-      const parts = key.replace('txn_','').split('_');
-      if(parts.length < 3) continue;
-      const catId = parts.slice(0,-2).join('_');
-      const y = parseInt(parts[parts.length-2]);
-      const m = parseInt(parts[parts.length-1]) - 1;
+      const match = key.match(/^txn_(\d{4})-(\d{2})_(.+)$/);
+      if(!match) continue;
+      const y = parseInt(match[1]);
+      const m = parseInt(match[2]) - 1;
+      const catId = match[3];
       if(catFilter && catId !== catFilter) continue;
       const txns = JSON.parse(localStorage.getItem(key) || '[]');
       for(const t of txns){
