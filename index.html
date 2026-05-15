@@ -472,6 +472,19 @@
           </div>
         </div>
       </div>
+      <!-- Receipt upload -->
+      <div id="receipt-upload-area" style="margin-top:4px">
+        <input type="file" id="receipt-file" accept="image/*" style="display:none" onchange="onReceiptSelected(this)">
+        <button type="button" id="receipt-upload-btn" onclick="triggerReceiptUpload()"
+          style="width:100%;padding:9px;border:1.5px dashed var(--border);border-radius:10px;background:transparent;color:var(--muted,#94a3b8);font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer;transition:border-color .2s">
+          📎 إرفاق صورة إيصال
+        </button>
+        <div id="receipt-preview" style="display:none;margin-top:8px;position:relative">
+          <img id="receipt-preview-img" style="width:100%;max-height:130px;object-fit:cover;border-radius:10px;display:block">
+          <button onclick="clearReceiptPreview()"
+            style="position:absolute;top:5px;left:5px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:26px;height:26px;font-size:15px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+      </div>
       <button class="txn-add-btn" onclick="addTransaction()">✅ إضافة</button>
     </div>
 
@@ -492,6 +505,26 @@
 
     <div class="modal-actions" style="margin-top:16px">
       <button class="modal-cancel" onclick="closeTxnModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RECEIPT VIEWER MODAL ===== -->
+<div id="receipt-viewer-modal" class="modal">
+  <div class="modal-content" style="max-width:520px;padding:12px">
+    <div class="modal-top-bar">
+      <div class="modal-handle"></div>
+      <button class="modal-close-x" onclick="closeReceiptViewer()">✕</button>
+    </div>
+    <div style="text-align:center;min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px">
+      <div id="receipt-viewer-loading" style="color:var(--muted,#94a3b8);font-size:14px;font-weight:700">⏳ جارٍ التحميل...</div>
+      <img id="receipt-viewer-img" style="max-width:100%;max-height:72vh;border-radius:12px;object-fit:contain;display:none">
+    </div>
+    <div class="modal-actions" style="margin-top:10px">
+      <a id="receipt-viewer-download" href="#" download style="display:none">
+        <button class="modal-save" type="button" style="margin-left:8px">⬇️ تحميل</button>
+      </a>
+      <button class="modal-cancel" onclick="closeReceiptViewer()">إغلاق</button>
     </div>
   </div>
 </div>

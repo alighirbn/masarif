@@ -2051,17 +2051,121 @@ function renderTxnList(){
     const methodBadge = isCard
       ? `<span class="txn-method-badge txn-method-card">💳 بطاقة</span>`
       : `<span class="txn-method-badge txn-method-cash">💵 كاش</span>`;
+    const receiptBtn = t.receipt
+      ? `<button class="txn-del-btn" style="background:#fef9c3;color:#854d0e;margin-left:4px" onclick="viewReceipt('${t.receipt}')" title="عرض الإيصال">🖼️</button>`
+      : '';
     return `<div class="txn-item${isEditing?' txn-item-editing':''}">
       <div class="txn-item-info">
         <div class="txn-item-desc">${t.desc || '—'}</div>
         <div class="txn-item-meta">${methodBadge}<span class="txn-item-date">📅 ${dateDisplay}</span></div>
       </div>
       <div class="txn-item-amount">${fmt(t.amount)} ${lbl}</div>
+      ${receiptBtn}
       <button class="txn-del-btn" style="background:#dbeafe;color:#1d4ed8;margin-left:4px" onclick="editTransaction(${i})" title="تعديل">✎</button>
       <button class="txn-del-btn" onclick="deleteTransaction(${i})" title="حذف">✕</button>
     </div>`;
   }).join('');
 }
+
+// ==================== RECEIPT IMAGES ====================
+let pendingReceiptFile = null;   // new file chosen by user
+let pendingReceiptPath = null;   // existing path when editing
+let receiptClearPending = false; // user removed existing receipt
+
+function triggerReceiptUpload(){
+  if(!currentUser){ showToast('⚠️ يجب تسجيل الدخول لإرفاق الصور'); return; }
+  document.getElementById('receipt-file').click();
+}
+
+function onReceiptSelected(input){
+  const file = input.files[0];
+  if(!file) return;
+  pendingReceiptFile = file;
+  receiptClearPending = false;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('receipt-preview-img').src = e.target.result;
+    document.getElementById('receipt-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearReceiptPreview(){
+  pendingReceiptFile = null;
+  receiptClearPending = true;
+  document.getElementById('receipt-file').value = '';
+  document.getElementById('receipt-preview').style.display = 'none';
+  document.getElementById('receipt-preview-img').src = '';
+}
+
+function _resetReceiptForm(){
+  pendingReceiptFile = null;
+  pendingReceiptPath = null;
+  receiptClearPending = false;
+  document.getElementById('receipt-file').value = '';
+  document.getElementById('receipt-preview').style.display = 'none';
+  document.getElementById('receipt-preview-img').src = '';
+  document.getElementById('receipt-upload-btn').textContent = '📎 إرفاق صورة إيصال';
+}
+
+async function _compressImage(file, maxPx, quality){
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if(w > maxPx || h > maxPx){
+        if(w > h){ h = Math.round(h * maxPx / w); w = maxPx; }
+        else { w = Math.round(w * maxPx / h); h = maxPx; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob => { URL.revokeObjectURL(url); resolve(blob || file); }, 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
+async function _uploadReceipt(file, txnId){
+  const compressed = await _compressImage(file, 1200, 0.82);
+  const path = `${currentUser.id}/${txnId}.jpg`;
+  const { error } = await db.storage.from('receipts').upload(path, compressed, { upsert: true, contentType: 'image/jpeg' });
+  if(error) throw error;
+  return path;
+}
+
+async function _deleteReceiptPath(path){
+  if(!path || !currentUser) return;
+  try { await db.storage.from('receipts').remove([path]); } catch(e){}
+}
+
+async function viewReceipt(path){
+  const modal = document.getElementById('receipt-viewer-modal');
+  const img   = document.getElementById('receipt-viewer-img');
+  const load  = document.getElementById('receipt-viewer-loading');
+  const dl    = document.getElementById('receipt-viewer-download');
+  img.style.display = 'none';
+  load.style.display = 'block';
+  dl.style.display = 'none';
+  modal.classList.add('active');
+  try {
+    const { data, error } = await db.storage.from('receipts').createSignedUrl(path, 3600);
+    if(error || !data?.signedUrl) throw error || new Error('no url');
+    img.onload = () => { load.style.display = 'none'; img.style.display = 'block'; dl.style.display = 'inline'; dl.href = data.signedUrl; };
+    img.onerror = () => { load.textContent = '❌ تعذّر تحميل الصورة'; };
+    img.src = data.signedUrl;
+  } catch(e){
+    load.textContent = '❌ تعذّر تحميل الصورة';
+  }
+}
+
+function closeReceiptViewer(){
+  document.getElementById('receipt-viewer-modal').classList.remove('active');
+  document.getElementById('receipt-viewer-img').src = '';
+}
+// ==================== END RECEIPT IMAGES ====================
 
 let txnEditIdx = null;
 function editTransaction(idx){
@@ -2073,6 +2177,13 @@ function editTransaction(idx){
   document.getElementById('txn-amount').value = t.amount || '';
   if(t.date) document.getElementById('txn-date').value = t.date;
   setPayMethod(t.method || 'cash');
+  // receipt
+  _resetReceiptForm();
+  if(t.receipt){
+    pendingReceiptPath = t.receipt;
+    receiptClearPending = false;
+    document.getElementById('receipt-upload-btn').textContent = '🖼️ إيصال مرفق — انقر للتغيير';
+  }
   document.querySelector('.txn-add-form .form-title').innerHTML = '✏️ تعديل العملية';
   document.querySelector('.txn-add-btn').innerHTML = '💾 حفظ التعديل';
   document.getElementById('txn-amount').focus();
@@ -2084,6 +2195,7 @@ function cancelEditTxn(){
   document.getElementById('txn-desc').value = '';
   document.getElementById('txn-amount').value = '';
   setPayMethod('cash');
+  _resetReceiptForm();
   document.querySelector('.txn-add-form .form-title').innerHTML = '➕ إضافة شراء جديد';
   document.querySelector('.txn-add-btn').innerHTML = '✅ إضافة';
   renderTxnList();
@@ -2098,31 +2210,59 @@ function formatArabicDate(dateStr){
   }catch(e){ return dateStr; }
 }
 
-function addTransaction(){
+async function addTransaction(){
   if(!txnCatId) return;
   const amountRaw = document.getElementById('txn-amount').value;
   const amount = safeCalc(amountRaw);
   if(!amount || amount <= 0){ showToast('⚠️ أدخل مبلغاً صحيحاً'); return; }
-  const desc = document.getElementById('txn-desc').value.trim();
-  const date = document.getElementById('txn-date').value;
-
-  const txns = loadTxns(curY, curM, txnCatId);
+  const desc   = document.getElementById('txn-desc').value.trim();
+  const date   = document.getElementById('txn-date').value;
   const method = selectedPayMethod || 'cash';
+  const txns   = loadTxns(curY, curM, txnCatId);
+  const btn    = document.querySelector('.txn-add-btn');
+  btn.disabled = true;
+
   if(txnEditIdx !== null && txns[txnEditIdx]){
-    txns[txnEditIdx] = { ...txns[txnEditIdx], amount, desc, date, method };
+    let receipt = txns[txnEditIdx].receipt || null;
+    if(receiptClearPending){
+      _deleteReceiptPath(receipt);
+      receipt = null;
+    } else if(pendingReceiptFile){
+      try {
+        btn.textContent = '⏳ جارٍ الرفع...';
+        if(receipt) _deleteReceiptPath(receipt);
+        receipt = await _uploadReceipt(pendingReceiptFile, txns[txnEditIdx].id);
+      } catch(e){ showToast('⚠️ فشل رفع الإيصال، تم الحفظ بدونه'); receipt = null; }
+    }
+    txns[txnEditIdx] = { ...txns[txnEditIdx], amount, desc, date, method, ...(receipt ? {receipt} : {receipt: undefined}) };
+    if(!receipt) delete txns[txnEditIdx].receipt;
     saveTxns(curY, curM, txnCatId, txns);
     syncTxnTotal(curY, curM, txnCatId);
     doSaveMonth(true);
+    btn.disabled = false;
     cancelEditTxn();
-    showToast(`✅ تم تعديل العملية`);
+    showToast('✅ تم تعديل العملية');
     return;
   }
-  txns.push({ amount, desc, date, id: Date.now(), method });
+
+  const txnId = Date.now();
+  let receipt = null;
+  if(pendingReceiptFile){
+    try {
+      btn.textContent = '⏳ جارٍ الرفع...';
+      receipt = await _uploadReceipt(pendingReceiptFile, txnId);
+    } catch(e){ showToast('⚠️ فشل رفع الإيصال، تم الحفظ بدونه'); }
+  }
+  const newTxn = { amount, desc, date, id: txnId, method };
+  if(receipt) newTxn.receipt = receipt;
+  txns.push(newTxn);
   saveTxns(curY, curM, txnCatId, txns);
   syncTxnTotal(curY, curM, txnCatId);
   markUnsaved();
   doSaveMonth(true);
   renderEntry();
+  btn.disabled = false;
+  _resetReceiptForm();
   showToast(`✅ تمت إضافة ${fmt(amount)} ${getCurrencyLabel()}`);
   closeTxnModal();
 }
@@ -2138,6 +2278,7 @@ async function deleteTransaction(idx){
   });
   if(!ok) return;
   const txns = loadTxns(curY, curM, txnCatId);
+  if(txns[idx]?.receipt) _deleteReceiptPath(txns[idx].receipt);
   txns.splice(idx, 1);
   saveTxns(curY, curM, txnCatId, txns);
   syncTxnTotal(curY, curM, txnCatId);
