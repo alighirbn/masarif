@@ -2932,6 +2932,42 @@ function renderDashboard(){
 }
 
 // ==================== SMART INSIGHTS ====================
+// Per-month dismissed insight storage (so a user-hidden insight stays hidden for the month).
+function getInsightDismissKey(yyyymm){ return `insights_dismissed_${yyyymm}`; }
+function loadDismissedInsights(yyyymm){
+  try { return JSON.parse(localStorage.getItem(getInsightDismissKey(yyyymm)) || '[]'); }
+  catch(e){ return []; }
+}
+function dismissInsight(id){
+  const key = mKey(curYD, curMD);
+  const arr = loadDismissedInsights(key);
+  if(!arr.includes(id)){
+    arr.push(id);
+    localStorage.setItem(getInsightDismissKey(key), JSON.stringify(arr));
+  }
+  renderDashboard();
+  showToast('🙈 تم إخفاء الرؤية لهذا الشهر');
+}
+// Handler dispatcher — insights register action functions on render and we
+// call them via stable string IDs in inline onclick attributes.
+window.__insightMap = window.__insightMap || {};
+function handleInsightAction(id, idx){
+  const ins = window.__insightMap[id];
+  if(!ins || !ins.actions || !ins.actions[idx]) return;
+  try { ins.actions[idx].fn(); } catch(e){ console.error(e); }
+}
+// Convenience: switch to entry tab and focus an input. Used by several insight actions.
+function gotoEntryAndFocus(fieldId){
+  switchTab('entry');
+  setTimeout(()=>{
+    const el = document.getElementById(fieldId);
+    if(el){
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      try { el.focus(); } catch(e){}
+    }
+  }, 80);
+}
+
 // Analyzes the current month against the user's history and returns a panel of
 // actionable, contextual insights. Each insight is one of: bad / warn / info / good / tip.
 function renderSmartInsights(ctx){
@@ -2944,7 +2980,18 @@ function renderSmartInsights(ctx){
   } = ctx;
 
   const items = [];
-  const push = (cls, icon, msg, priority) => items.push({cls, icon, msg, priority});
+  // push({id, cls, icon, msg, priority, actions:[{label, fn}]})
+  const push = (id, cls, icon, msg, priority, actions) =>
+    items.push({id, cls, icon, msg, priority, actions: actions || []});
+
+  // Common action factories
+  const actOpenCat = (catId) => ({ label:'📋 عرض المعاملات', fn:()=>openTxnModal(catId) });
+  const actOpenLimits = () => ({ label:'⚙️ ضبط الحدود', fn:()=>openLimitsModal() });
+  const actWhatIf = () => ({ label:'🧮 حاسبة ماذا لو', fn:()=>gotoEntryAndFocus('whatif-amount') });
+  const actFocusIncome = () => ({ label:'➕ إضافة الدخل', fn:()=>gotoEntryAndFocus('inp-income') });
+  const actFocusEmergency = () => ({ label:'🛡️ إضافة الاحتياطي', fn:()=>gotoEntryAndFocus('inp-emergency') });
+  const actGotoEntry = () => ({ label:'✏️ ابدأ الإدخال', fn:()=>switchTab('entry') });
+  const actGotoCompare = () => ({ label:'⚖️ مقارنة الأشهر', fn:()=>switchTab('compare') });
 
   // ---- 1) Pace / projection warnings (current month only, when income set) ----
   if(isCurrentMonth && income > 0 && cumulativeSoFar > 0 && daysElapsed >= 3){
@@ -2953,25 +3000,25 @@ function renderSmartInsights(ctx){
     if(projection > income){
       const overBy = projection - income;
       if(dayOfExceed <= daysInMonth){
-        push('bad','🚨',
+        push('pace_exceed','bad','🚨',
           `بهذا المعدل ستتجاوز <b>الدخل</b> قبل يوم <b>${dayOfExceed}</b> من الشهر — التوقع <b>${fmt(projection)}</b> ${lbl} (زيادة ${fmt(overBy)} ${lbl}).`,
-          100);
+          100, [actWhatIf()]);
       } else {
-        push('warn','📉',
+        push('pace_warn','warn','📉',
           `التوقع الحالي <b>${fmt(projection)}</b> ${lbl} يتجاوز دخلك بـ <b>${fmt(overBy)}</b> ${lbl}. خفّض ${Math.ceil(overBy/Math.max(1,daysLeft))} ${lbl} يومياً للبقاء ضمن الميزانية.`,
-          90);
+          90, [actWhatIf()]);
       }
     } else if(income > 0 && projection > 0 && projection <= income * 0.85){
-      push('good','🌟',
+      push('pace_good','good','🌟',
         `أداء ممتاز! بهذا المعدل ستنهي الشهر بصرف <b>${fmt(projection)}</b> ${lbl} فقط — توفير محتمل <b>${fmt(income-projection-emergency)}</b> ${lbl}.`,
-        30);
+        30, []);
     }
 
     // Daily allowance squeezed
     if(dailyAllowance > 0 && avgPerDay > 0 && dailyAllowance < avgPerDay * 0.6 && daysLeft > 0){
-      push('warn','⏳',
+      push('daily_squeeze','warn','⏳',
         `المتاح يومياً <b>${fmt(dailyAllowance)}</b> ${lbl} أقل بكثير من متوسط صرفك (<b>${fmt(avgPerDay)}</b> ${lbl}). خفّض الصرف لتجاوز نهاية الشهر بأمان.`,
-        80);
+        80, [actWhatIf()]);
     }
   }
 
@@ -3007,14 +3054,14 @@ function renderSmartInsights(ctx){
   anomalies.sort((a,b)=>b.diff - a.diff);
   anomalies.slice(0,2).forEach(a=>{
     if(a.kind === 'new'){
-      push('info','✨',
+      push(`anomaly_new_${a.cat.id}`,'info','✨',
         `فئة جديدة هذا الشهر: <b>${a.cat.icon} ${a.cat.name}</b> بمبلغ <b>${fmt(a.cur)}</b> ${lbl} — لم تصرف عليها في آخر 3 أشهر.`,
-        50);
+        50, [actOpenCat(a.cat.id)]);
     } else {
       const xLabel = a.ratio >= 3 ? 'ضعفين' : a.ratio >= 2 ? 'ضعفي' : '~80% أكثر من';
-      push('warn','🔍',
+      push(`anomaly_spike_${a.cat.id}`,'warn','🔍',
         `صرفت على <b>${a.cat.icon} ${a.cat.name}</b> ${xLabel} متوسط آخر 3 أشهر (<b>${fmt(a.cur)}</b> مقابل ${fmt(a.avg)} ${lbl}).`,
-        70);
+        70, [actOpenCat(a.cat.id), actOpenLimits()]);
     }
   });
 
@@ -3031,9 +3078,9 @@ function renderSmartInsights(ctx){
   if(overLimit.length > 0){
     const top = overLimit[0];
     const extra = overLimit.length > 1 ? ` و<b>${overLimit.length-1}</b> فئة أخرى تجاوزت حدودها.` : '';
-    push('bad','⚠️',
+    push(`overlimit_${top.cat.id}`,'bad','⚠️',
       `<b>${top.cat.icon} ${top.cat.name}</b> تجاوزت الحد بـ <b>${fmt(top.over)}</b> ${lbl} (${fmt(top.v)} من ${fmt(top.lim)}).${extra}`,
-      85);
+      85, [actOpenCat(top.cat.id), actOpenLimits()]);
   }
 
   // ---- 4) Weekday pattern (need at least 6 dated transactions) ----
@@ -3062,13 +3109,13 @@ function renderSmartInsights(ctx){
         // Weekend (Fri+Sat) cluster — common pattern
         const weekendShare = totalDow > 0 ? (byDow[5]+byDow[6]) / totalDow : 0;
         if(weekendShare >= 0.5){
-          push('info','📅',
+          push('dow_weekend','info','📅',
             `<b>${Math.round(weekendShare*100)}%</b> من صرف هذا الشهر تركّز في <b>الجمعة والسبت</b>. التخطيط المسبق لعطلة نهاية الأسبوع يخفض الصرف.`,
-            45);
+            45, []);
         } else if(maxPct >= 32){
-          push('info','📅',
+          push(`dow_max_${maxDow}`,'info','📅',
             `أكثر يوم صرفاً عندك هو <b>${dowNames[maxDow]}</b> (<b>${maxPct}%</b> من إجمالي الشهر).`,
-            40);
+            40, []);
         }
       }
     }
@@ -3087,9 +3134,9 @@ function renderSmartInsights(ctx){
     });
     if(biggest){
       const cutBack = Math.round(biggest.change * 0.5);
-      push('tip','💡',
+      push(`mover_${biggest.cat.id}`,'tip','💡',
         `<b>${biggest.cat.icon} ${biggest.cat.name}</b> ارتفعت بـ <b>+${biggest.pct}%</b> عن ${MONTHS[prevM]}. تقليلها بمقدار <b>${fmt(cutBack)}</b> ${lbl} يُعيد توازن الميزانية.`,
-        35);
+        35, [actOpenCat(biggest.cat.id), actOpenLimits()]);
     }
   }
 
@@ -3110,9 +3157,9 @@ function renderSmartInsights(ctx){
     }
     const currentMonthOk = savGoal === 0 || remaining >= savGoal;
     if(currentMonthOk && streak >= 2){
-      push('good','🏆',
+      push(`streak_${streak+1}`,'good','🏆',
         `إنجاز! هذا هو الشهر <b>${streak+1}</b> على التوالي تحقق فيه ${savGoal > 0 ? 'هدف التوفير' : 'توفيراً إيجابياً'} — استمر!`,
-        25);
+        25, []);
     }
   }
 
@@ -3133,65 +3180,99 @@ function renderSmartInsights(ctx){
       // Only celebrate "lowest" if month is finished or near end (>=80%)
       const monthMostlyDone = !isCurrentMonth || daysElapsed >= daysInMonth * 0.8;
       if(minRec.y === curYD && minRec.m === curMD && monthMostlyDone && window.length >= 4){
-        push('good','📉',
+        push(`min_${mKey(curYD,curMD)}`,'good','📉',
           `هذا الشهر هو <b>الأقل صرفاً</b> في آخر ${window.length} أشهر — توفير رائع!`,
-          28);
+          28, []);
       } else if(maxRec.y === curYD && maxRec.m === curMD && window.length >= 4){
-        push('warn','📈',
+        push(`max_${mKey(curYD,curMD)}`,'warn','📈',
           `هذا الشهر هو <b>الأعلى صرفاً</b> في آخر ${window.length} أشهر — راجع الفئات الرئيسية.`,
-          55);
+          55, [actGotoCompare()]);
       }
     }
   }
 
   // ---- 8) Emergency fund missing nudge ----
   if(income > 0 && emergency === 0 && remaining > income * 0.1){
-    push('tip','🛡️',
+    push('emergency_missing','tip','🛡️',
       `لم تحدد <b>احتياطي طوارئ</b> هذا الشهر. حجز <b>5-10%</b> من دخلك يحميك من المفاجآت.`,
-      20);
+      20, [actFocusEmergency()]);
   }
 
   // ---- 9) No income recorded ----
   if(income === 0 && total > 0){
-    push('info','💼',
+    push('no_income','info','💼',
       `لم تسجّل <b>دخلك الشهري</b> بعد. إضافته تُفعّل التوقعات والتنبيهات الذكية.`,
-      60);
+      60, [actFocusIncome()]);
   }
 
   // ---- 10) New user / empty state ----
   if(income === 0 && total === 0 && Object.keys(all).length === 0){
-    push('info','👋',
+    push('welcome','info','👋',
       `مرحباً! ابدأ بتسجيل <b>دخلك</b> ثم <b>مصاريفك</b> من تبويب الإدخال لتظهر الرؤى الذكية المخصصة لك.`,
-      100);
+      100, [actGotoEntry()]);
   }
 
+  // ---- Filter out user-dismissed insights for this month ----
+  const monthKey = mKey(curYD, curMD);
+  const dismissed = loadDismissedInsights(monthKey);
+  const filtered = items.filter(i => !dismissed.includes(i.id));
+
   // ---- Sort by priority, cap at 6 ----
-  items.sort((a,b)=>b.priority - a.priority);
-  const shown = items.slice(0, 6);
+  filtered.sort((a,b)=>b.priority - a.priority);
+  const shown = filtered.slice(0, 6);
+
+  // Register handlers for action button dispatch
+  window.__insightMap = {};
+  shown.forEach(i => { window.__insightMap[i.id] = i; });
+
+  // Header: show count + "restore dismissed" if any were hidden
+  const hiddenCount = items.length - filtered.length;
+  const restoreBtn = hiddenCount > 0
+    ? `<button class="ins-restore" onclick="restoreInsights()" title="إظهار المخفية">🔄 ${hiddenCount}</button>`
+    : '';
 
   if(shown.length === 0){
     return `<div class="insights-box">
       <div class="ins-header">
         <span class="ins-title">🧠 الرؤى الذكية</span>
+        ${restoreBtn}
       </div>
-      <div class="ins-empty">📊 لا توجد ملاحظات استثنائية — أداؤك متوازن هذا الشهر.</div>
+      <div class="ins-empty">📊 ${hiddenCount > 0 ? 'كل الرؤى مخفية — اضغط 🔄 لاستعادتها' : 'لا توجد ملاحظات استثنائية — أداؤك متوازن هذا الشهر.'}</div>
     </div>`;
   }
 
-  const itemsHTML = shown.map(i =>
-    `<div class="ins-item ${i.cls}">
+  const itemsHTML = shown.map(i => {
+    const actionsHTML = (i.actions||[]).length > 0
+      ? `<div class="ins-actions">${i.actions.map((a,idx)=>
+          `<button class="ins-action" onclick="handleInsightAction('${i.id}',${idx})">${a.label}</button>`
+        ).join('')}</div>`
+      : '';
+    return `<div class="ins-item ${i.cls}" data-iid="${i.id}">
       <span class="ins-icon">${i.icon}</span>
-      <div class="ins-body"><div class="ins-msg">${i.msg}</div></div>
-    </div>`
-  ).join('');
+      <div class="ins-body">
+        <div class="ins-msg">${i.msg}</div>
+        ${actionsHTML}
+      </div>
+      <button class="ins-dismiss" onclick="dismissInsight('${i.id}')" title="إخفاء لهذا الشهر">✕</button>
+    </div>`;
+  }).join('');
 
   return `<div class="insights-box">
     <div class="ins-header">
       <span class="ins-title">🧠 الرؤى الذكية</span>
       <span class="ins-count">${shown.length}</span>
+      ${restoreBtn}
     </div>
     <div class="ins-list">${itemsHTML}</div>
   </div>`;
+}
+
+// Restore all dismissed insights for the current month
+function restoreInsights(){
+  const key = mKey(curYD, curMD);
+  localStorage.removeItem(getInsightDismissKey(key));
+  renderDashboard();
+  showToast('✅ تم استعادة الرؤى المخفية');
 }
 
 // ==================== RECURRING SUGGESTIONS ====================

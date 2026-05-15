@@ -1508,9 +1508,10 @@ body.dark .insights-box {
   pointer-events:none;
 }
 .ins-header {
-  display:flex; align-items:center; justify-content:space-between;
+  display:flex; align-items:center; flex-wrap:wrap;
   gap:8px; margin-bottom:10px; position:relative; z-index:1;
 }
+.ins-header .ins-title { margin-right: auto; }
 .ins-title {
   font-size:14px; font-weight:900; color:#5b21b6;
   display:flex; align-items:center; gap:6px;
@@ -1526,11 +1527,12 @@ body.dark .ins-title { color:#c4b5fd; }
   background: rgba(255,255,255,0.7);
   border-left: 3px solid #8b5cf6;
   border-radius: 10px;
-  padding: 9px 11px;
-  transition: transform .15s;
+  padding: 9px 11px 9px 11px;
+  transition: transform .15s, box-shadow .15s;
+  position: relative;
 }
 body.dark .ins-item { background: rgba(255,255,255,0.06); }
-.ins-item:active { transform: scale(0.99); }
+.ins-item:hover { box-shadow: 0 2px 8px rgba(139,92,246,0.15); }
 .ins-item.warn  { border-left-color:#f59e0b; background:rgba(254,243,199,0.7); }
 .ins-item.bad   { border-left-color:#dc2626; background:rgba(254,226,226,0.7); }
 .ins-item.good  { border-left-color:#10b981; background:rgba(209,250,229,0.7); }
@@ -1556,15 +1558,66 @@ body.dark .ins-item.bad .ins-msg b  { color:#fca5a5; }
 body.dark .ins-item.warn .ins-msg b { color:#fcd34d; }
 body.dark .ins-item.good .ins-msg b { color:#6ee7b7; }
 body.dark .ins-item.info .ins-msg b { color:#93c5fd; }
-.ins-action {
-  display:inline-block; margin-top:5px;
-  font-size:11px; font-weight:800; color:#7c3aed;
-  background:transparent; border:1.5px solid #c4b5fd;
-  border-radius:8px; padding:4px 10px; cursor:pointer;
-  font-family:'Cairo',sans-serif;
+.ins-actions {
+  display:flex; flex-wrap:wrap; gap:5px; margin-top:7px;
 }
-.ins-action:active { transform: scale(0.96); }
-body.dark .ins-action { color:#c4b5fd; border-color:#6d28d9; }
+.ins-action {
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:11px; font-weight:800; color:#5b21b6;
+  background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.35);
+  border-radius:8px; padding:5px 10px; cursor:pointer;
+  font-family:'Cairo',sans-serif; transition: all .15s;
+  white-space:nowrap;
+}
+.ins-action:hover {
+  background:#8b5cf6; color:#fff; border-color:#8b5cf6;
+}
+.ins-action:active { transform: scale(0.95); }
+body.dark .ins-action {
+  color:#c4b5fd; background:rgba(139,92,246,0.18); border-color:#6d28d9;
+}
+body.dark .ins-action:hover { background:#7c3aed; color:#fff; }
+
+/* Item-type-tinted action buttons */
+.ins-item.bad .ins-action  { color:#b91c1c; background:rgba(220,38,38,0.08); border-color:rgba(220,38,38,0.35); }
+.ins-item.bad .ins-action:hover  { background:#dc2626; color:#fff; }
+.ins-item.warn .ins-action { color:#b45309; background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.4); }
+.ins-item.warn .ins-action:hover { background:#f59e0b; color:#fff; }
+.ins-item.good .ins-action { color:#047857; background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.4); }
+.ins-item.good .ins-action:hover { background:#10b981; color:#fff; }
+.ins-item.info .ins-action { color:#1d4ed8; background:rgba(59,130,246,0.1); border-color:rgba(59,130,246,0.4); }
+.ins-item.info .ins-action:hover { background:#3b82f6; color:#fff; }
+
+/* Dismiss (✕) button — top-left in RTL */
+.ins-dismiss {
+  position: absolute; top: 4px; left: 4px;
+  width: 22px; height: 22px; flex-shrink: 0;
+  background: transparent; border: none; cursor: pointer;
+  font-size: 12px; font-weight: 900; color: #94a3b8;
+  border-radius: 50%; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.55; transition: all .15s;
+  font-family: 'Cairo', sans-serif;
+}
+.ins-dismiss:hover {
+  opacity: 1; background: rgba(0,0,0,0.08); color: #475569;
+}
+body.dark .ins-dismiss:hover { background: rgba(255,255,255,0.1); color: #cbd5e1; }
+.ins-item .ins-body { padding-left: 22px; }
+
+/* Restore-hidden button in header */
+.ins-restore {
+  background: rgba(139,92,246,0.15); color: #6d28d9;
+  border: 1px solid rgba(139,92,246,0.4);
+  border-radius: 10px; padding: 3px 10px;
+  font-size: 11px; font-weight: 800;
+  font-family: 'Cairo', sans-serif; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  transition: all .15s;
+}
+.ins-restore:hover { background: #8b5cf6; color: #fff; }
+.ins-restore:active { transform: scale(0.96); }
+body.dark .ins-restore { color: #c4b5fd; background: rgba(139,92,246,0.22); border-color: #6d28d9; }
 .ins-empty {
   text-align:center; padding:14px 8px;
   font-size:12.5px; font-weight:700; color:#7c3aed;
