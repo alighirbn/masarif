@@ -2908,8 +2908,16 @@ function renderDashboard(){
   }
 
   const billsHTML = renderUpcomingBills();
+  const insightsHTML = renderSmartInsights({
+    curYD, curMD, s, total, income, emergency, savGoal, remaining, savPct,
+    sPrev, totalPrev, prevM, prevY,
+    isCurrentMonth, daysInMonth, daysElapsed, daysLeft, todayDay,
+    cumulativeSoFar, avgPerDay, projection, dailyAllowance,
+    dailyTotals, lbl
+  });
   out.innerHTML =
     healthHTML +
+    insightsHTML +
     kpiHTML +
     daysHTML +
     billsHTML +
@@ -2921,6 +2929,269 @@ function renderDashboard(){
     nearHTML +
     recentHTML +
     savingCompareHTML;
+}
+
+// ==================== SMART INSIGHTS ====================
+// Analyzes the current month against the user's history and returns a panel of
+// actionable, contextual insights. Each insight is one of: bad / warn / info / good / tip.
+function renderSmartInsights(ctx){
+  const {
+    curYD, curMD, s, total, income, emergency, savGoal, remaining, savPct,
+    sPrev, totalPrev, prevM,
+    isCurrentMonth, daysInMonth, daysElapsed, daysLeft,
+    cumulativeSoFar, avgPerDay, projection, dailyAllowance,
+    dailyTotals, lbl
+  } = ctx;
+
+  const items = [];
+  const push = (cls, icon, msg, priority) => items.push({cls, icon, msg, priority});
+
+  // ---- 1) Pace / projection warnings (current month only, when income set) ----
+  if(isCurrentMonth && income > 0 && cumulativeSoFar > 0 && daysElapsed >= 3){
+    const dailyRate = cumulativeSoFar / daysElapsed;
+    const dayOfExceed = dailyRate > 0 ? Math.ceil(income / dailyRate) : 999;
+    if(projection > income){
+      const overBy = projection - income;
+      if(dayOfExceed <= daysInMonth){
+        push('bad','🚨',
+          `بهذا المعدل ستتجاوز <b>الدخل</b> قبل يوم <b>${dayOfExceed}</b> من الشهر — التوقع <b>${fmt(projection)}</b> ${lbl} (زيادة ${fmt(overBy)} ${lbl}).`,
+          100);
+      } else {
+        push('warn','📉',
+          `التوقع الحالي <b>${fmt(projection)}</b> ${lbl} يتجاوز دخلك بـ <b>${fmt(overBy)}</b> ${lbl}. خفّض ${Math.ceil(overBy/Math.max(1,daysLeft))} ${lbl} يومياً للبقاء ضمن الميزانية.`,
+          90);
+      }
+    } else if(income > 0 && projection > 0 && projection <= income * 0.85){
+      push('good','🌟',
+        `أداء ممتاز! بهذا المعدل ستنهي الشهر بصرف <b>${fmt(projection)}</b> ${lbl} فقط — توفير محتمل <b>${fmt(income-projection-emergency)}</b> ${lbl}.`,
+        30);
+    }
+
+    // Daily allowance squeezed
+    if(dailyAllowance > 0 && avgPerDay > 0 && dailyAllowance < avgPerDay * 0.6 && daysLeft > 0){
+      push('warn','⏳',
+        `المتاح يومياً <b>${fmt(dailyAllowance)}</b> ${lbl} أقل بكثير من متوسط صرفك (<b>${fmt(avgPerDay)}</b> ${lbl}). خفّض الصرف لتجاوز نهاية الشهر بأمان.`,
+        80);
+    }
+  }
+
+  // ---- 2) Category anomaly detection (vs avg of last 3 months) ----
+  const all = loadAll();
+  const histKeys = [];
+  let yy = curYD, mm = curMD;
+  for(let i=1; i<=3; i++){
+    mm--; if(mm<0){ mm=11; yy--; }
+    histKeys.push(mKey(yy, mm));
+  }
+  const histAvgFor = (catId) => {
+    let sum = 0, n = 0;
+    histKeys.forEach(k=>{
+      if(all[k] && all[k][catId] != null){ sum += all[k][catId]||0; n++; }
+    });
+    return n > 0 ? sum/n : null;
+  };
+
+  const anomalies = [];
+  CATS.forEach(c=>{
+    const cur = s[c.id]||0;
+    if(cur < 5000) return; // skip tiny amounts
+    const avg = histAvgFor(c.id);
+    if(avg === null) return;
+    const diff = cur - avg;
+    if(avg > 0 && cur >= avg * 1.8 && diff >= 10000){
+      anomalies.push({cat:c, cur, avg, diff, ratio: cur/avg, kind:'spike'});
+    } else if(avg === 0 && cur >= 20000){
+      anomalies.push({cat:c, cur, avg:0, diff:cur, ratio:Infinity, kind:'new'});
+    }
+  });
+  anomalies.sort((a,b)=>b.diff - a.diff);
+  anomalies.slice(0,2).forEach(a=>{
+    if(a.kind === 'new'){
+      push('info','✨',
+        `فئة جديدة هذا الشهر: <b>${a.cat.icon} ${a.cat.name}</b> بمبلغ <b>${fmt(a.cur)}</b> ${lbl} — لم تصرف عليها في آخر 3 أشهر.`,
+        50);
+    } else {
+      const xLabel = a.ratio >= 3 ? 'ضعفين' : a.ratio >= 2 ? 'ضعفي' : '~80% أكثر من';
+      push('warn','🔍',
+        `صرفت على <b>${a.cat.icon} ${a.cat.name}</b> ${xLabel} متوسط آخر 3 أشهر (<b>${fmt(a.cur)}</b> مقابل ${fmt(a.avg)} ${lbl}).`,
+        70);
+    }
+  });
+
+  // ---- 3) Limit alerts (over and approaching) ----
+  const overLimit = [];
+  CATS.forEach(c=>{
+    const v = s[c.id]||0;
+    const lim = getLimitForCategory(c.id);
+    if(lim > 0 && v > lim){
+      overLimit.push({cat:c, v, lim, over:v-lim});
+    }
+  });
+  overLimit.sort((a,b)=>b.over - a.over);
+  if(overLimit.length > 0){
+    const top = overLimit[0];
+    const extra = overLimit.length > 1 ? ` و<b>${overLimit.length-1}</b> فئة أخرى تجاوزت حدودها.` : '';
+    push('bad','⚠️',
+      `<b>${top.cat.icon} ${top.cat.name}</b> تجاوزت الحد بـ <b>${fmt(top.over)}</b> ${lbl} (${fmt(top.v)} من ${fmt(top.lim)}).${extra}`,
+      85);
+  }
+
+  // ---- 4) Weekday pattern (need at least 6 dated transactions) ----
+  if(isCurrentMonth && daysElapsed >= 7){
+    const byDow = [0,0,0,0,0,0,0]; // Sun..Sat
+    const cntDow = [0,0,0,0,0,0,0];
+    let datedTxns = 0;
+    CATS.forEach(c=>{
+      loadTxns(curYD, curMD, c.id).forEach(t=>{
+        if(!t.date) return;
+        const d = new Date(t.date);
+        if(isNaN(d)) return;
+        const dow = d.getDay();
+        byDow[dow] += (t.amount||0);
+        cntDow[dow]++;
+        datedTxns++;
+      });
+    });
+    if(datedTxns >= 6){
+      const totalDow = byDow.reduce((a,b)=>a+b,0);
+      if(totalDow > 0){
+        const dowNames = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+        let maxDow = 0;
+        byDow.forEach((v,i)=>{ if(v > byDow[maxDow]) maxDow = i; });
+        const maxPct = Math.round(byDow[maxDow]/totalDow*100);
+        // Weekend (Fri+Sat) cluster — common pattern
+        const weekendShare = totalDow > 0 ? (byDow[5]+byDow[6]) / totalDow : 0;
+        if(weekendShare >= 0.5){
+          push('info','📅',
+            `<b>${Math.round(weekendShare*100)}%</b> من صرف هذا الشهر تركّز في <b>الجمعة والسبت</b>. التخطيط المسبق لعطلة نهاية الأسبوع يخفض الصرف.`,
+            45);
+        } else if(maxPct >= 32){
+          push('info','📅',
+            `أكثر يوم صرفاً عندك هو <b>${dowNames[maxDow]}</b> (<b>${maxPct}%</b> من إجمالي الشهر).`,
+            40);
+        }
+      }
+    }
+  }
+
+  // ---- 5) Biggest mover recommendation ----
+  if(income > 0 && totalPrev > 0){
+    let biggest = null;
+    CATS.forEach(c=>{
+      const cur = s[c.id]||0;
+      const prv = sPrev[c.id]||0;
+      const change = cur - prv;
+      if(prv > 0 && change > 20000 && (!biggest || change > biggest.change)){
+        biggest = {cat:c, cur, prv, change, pct: prv > 0 ? Math.round((change/prv)*100) : 0};
+      }
+    });
+    if(biggest){
+      const cutBack = Math.round(biggest.change * 0.5);
+      push('tip','💡',
+        `<b>${biggest.cat.icon} ${biggest.cat.name}</b> ارتفعت بـ <b>+${biggest.pct}%</b> عن ${MONTHS[prevM]}. تقليلها بمقدار <b>${fmt(cutBack)}</b> ${lbl} يُعيد توازن الميزانية.`,
+        35);
+    }
+  }
+
+  // ---- 6) Saving streak / achievement ----
+  if(income > 0 && remaining > 0){
+    // Check last 3 months: how many had saving > 0 (and savingGoal achieved if set)?
+    let streak = 0;
+    for(let i=0; i<histKeys.length; i++){
+      const md = all[histKeys[i]];
+      if(!md) break;
+      const t = CATS.reduce((a,c)=>a+(md[c.id]||0),0);
+      const inc = md.income||0;
+      const em = md.emergency||0;
+      const rem = inc - t - em;
+      const sg = md.savingGoal||0;
+      const ok = inc > 0 && rem > 0 && (sg === 0 || rem >= sg);
+      if(ok) streak++; else break;
+    }
+    const currentMonthOk = savGoal === 0 || remaining >= savGoal;
+    if(currentMonthOk && streak >= 2){
+      push('good','🏆',
+        `إنجاز! هذا هو الشهر <b>${streak+1}</b> على التوالي تحقق فيه ${savGoal > 0 ? 'هدف التوفير' : 'توفيراً إيجابياً'} — استمر!`,
+        25);
+    }
+  }
+
+  // ---- 7) Best/worst month in 6-month window ----
+  if(total > 0){
+    const window = [];
+    let yy2 = curYD, mm2 = curMD;
+    for(let i=0; i<6; i++){
+      const md = loadM(yy2, mm2);
+      const t = CATS.reduce((a,c)=>a+(md[c.id]||0),0);
+      if(t > 0) window.push({y:yy2, m:mm2, t});
+      mm2--; if(mm2<0){ mm2=11; yy2--; }
+    }
+    if(window.length >= 3){
+      const sorted = [...window].sort((a,b)=>a.t - b.t);
+      const minRec = sorted[0];
+      const maxRec = sorted[sorted.length-1];
+      // Only celebrate "lowest" if month is finished or near end (>=80%)
+      const monthMostlyDone = !isCurrentMonth || daysElapsed >= daysInMonth * 0.8;
+      if(minRec.y === curYD && minRec.m === curMD && monthMostlyDone && window.length >= 4){
+        push('good','📉',
+          `هذا الشهر هو <b>الأقل صرفاً</b> في آخر ${window.length} أشهر — توفير رائع!`,
+          28);
+      } else if(maxRec.y === curYD && maxRec.m === curMD && window.length >= 4){
+        push('warn','📈',
+          `هذا الشهر هو <b>الأعلى صرفاً</b> في آخر ${window.length} أشهر — راجع الفئات الرئيسية.`,
+          55);
+      }
+    }
+  }
+
+  // ---- 8) Emergency fund missing nudge ----
+  if(income > 0 && emergency === 0 && remaining > income * 0.1){
+    push('tip','🛡️',
+      `لم تحدد <b>احتياطي طوارئ</b> هذا الشهر. حجز <b>5-10%</b> من دخلك يحميك من المفاجآت.`,
+      20);
+  }
+
+  // ---- 9) No income recorded ----
+  if(income === 0 && total > 0){
+    push('info','💼',
+      `لم تسجّل <b>دخلك الشهري</b> بعد. إضافته تُفعّل التوقعات والتنبيهات الذكية.`,
+      60);
+  }
+
+  // ---- 10) New user / empty state ----
+  if(income === 0 && total === 0 && Object.keys(all).length === 0){
+    push('info','👋',
+      `مرحباً! ابدأ بتسجيل <b>دخلك</b> ثم <b>مصاريفك</b> من تبويب الإدخال لتظهر الرؤى الذكية المخصصة لك.`,
+      100);
+  }
+
+  // ---- Sort by priority, cap at 6 ----
+  items.sort((a,b)=>b.priority - a.priority);
+  const shown = items.slice(0, 6);
+
+  if(shown.length === 0){
+    return `<div class="insights-box">
+      <div class="ins-header">
+        <span class="ins-title">🧠 الرؤى الذكية</span>
+      </div>
+      <div class="ins-empty">📊 لا توجد ملاحظات استثنائية — أداؤك متوازن هذا الشهر.</div>
+    </div>`;
+  }
+
+  const itemsHTML = shown.map(i =>
+    `<div class="ins-item ${i.cls}">
+      <span class="ins-icon">${i.icon}</span>
+      <div class="ins-body"><div class="ins-msg">${i.msg}</div></div>
+    </div>`
+  ).join('');
+
+  return `<div class="insights-box">
+    <div class="ins-header">
+      <span class="ins-title">🧠 الرؤى الذكية</span>
+      <span class="ins-count">${shown.length}</span>
+    </div>
+    <div class="ins-list">${itemsHTML}</div>
+  </div>`;
 }
 
 // ==================== RECURRING SUGGESTIONS ====================

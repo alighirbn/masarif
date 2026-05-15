@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "PowerShell(head -100)",
-      "PowerShell(ls -Recurse \"c:\\\\xampp\\\\htdocs\\\\masarif\" | Select-Object -First 100 | ForEach-Object { $_.FullName })"
+      "PowerShell(ls -Recurse \"c:\\\\xampp\\\\htdocs\\\\masarif\" | Select-Object -First 100 | ForEach-Object { $_.FullName })",
+      "Bash(node --check c:/xampp/htdocs/masarif/app.js)"
     ]
   }
 }
