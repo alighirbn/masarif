@@ -475,10 +475,17 @@
       <!-- Receipt upload -->
       <div id="receipt-upload-area" style="margin-top:4px">
         <input type="file" id="receipt-file" accept="image/*" style="display:none" onchange="onReceiptSelected(this)">
-        <button type="button" id="receipt-upload-btn" onclick="triggerReceiptUpload()"
-          style="width:100%;padding:9px;border:1.5px dashed var(--border);border-radius:10px;background:transparent;color:var(--muted,#94a3b8);font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer;transition:border-color .2s">
-          📎 إرفاق صورة إيصال
-        </button>
+        <input type="file" id="receipt-file-camera" accept="image/*" capture="environment" style="display:none" onchange="onReceiptSelected(this)">
+        <div style="display:flex;gap:8px">
+          <button type="button" onclick="document.getElementById('receipt-file-camera').click()"
+            style="flex:1;padding:9px;border:1.5px dashed var(--border);border-radius:10px;background:transparent;color:var(--muted,#94a3b8);font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer">
+            📷 كاميرا
+          </button>
+          <button type="button" id="receipt-upload-btn" onclick="triggerReceiptUpload()"
+            style="flex:1;padding:9px;border:1.5px dashed var(--border);border-radius:10px;background:transparent;color:var(--muted,#94a3b8);font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer">
+            🖼️ معرض الصور
+          </button>
+        </div>
         <div id="receipt-preview" style="display:none;margin-top:8px;position:relative">
           <img id="receipt-preview-img" style="width:100%;max-height:130px;object-fit:cover;border-radius:10px;display:block">
           <button onclick="clearReceiptPreview()"
